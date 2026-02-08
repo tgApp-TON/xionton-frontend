@@ -19,8 +19,14 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@ton/core": "^0.63.0",
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^16.2.2",
     "dotenv": "^17.2.4",
-    "grammy": "^1.39.3"
+    "grammy": "^1.39.3",
+    "ton-core": "^0.53.0",
+    "ton-crypto": "^3.2.0",
+    "tonweb": "^0.0.66"
   },
   "prisma": {
     "seed": "ts-node prisma/seed/seed.ts"

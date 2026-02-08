@@ -1,12 +1,13 @@
 import { Bot, InlineKeyboard, Keyboard } from 'grammy';
 import dotenv from 'dotenv';
 import { findOrCreateUser, getUserData } from '../services/db';
+import { generatePaymentLink, generatePaymentQR, TABLE_PRICES } from '../services/ton/payment';
 
 dotenv.config();
 
 const bot = new Bot(process.env.MAIN_BOT_TOKEN!);
 
-// Главное меню (клавиатура внизу)
+// Главное меню
 const mainKeyboard = new Keyboard()
   .text('👤 Профиль').text('📊 Мои столы').row()
   .text('👥 Рефералы').text('💰 Баланс').row()
@@ -20,7 +21,6 @@ bot.command('start', async (ctx) => {
   const firstName = ctx.from.first_name || 'User';
   const telegramId = ctx.from.id;
   
-  // Регистрация или получение пользователя из БД
   const user = await findOrCreateUser(telegramId, {
     username: ctx.from.username,
     firstName: ctx.from.first_name,
@@ -90,7 +90,7 @@ bot.hears('📊 Мои столы', async (ctx) => {
   for (let i = 1; i <= 3; i++) {
     const table = tables.find(t => t.tableNumber === i);
     const status = table ? '🟢' : '⚪️';
-    const price = 10 * Math.pow(2, i - 1);
+    const price = TABLE_PRICES[i as keyof typeof TABLE_PRICES];
     inlineKeyboard.text(`${status} Table ${i} (${price} TON)`, `table_${i}`).row();
   }
   
@@ -202,7 +202,7 @@ bot.on('callback_query:data', async (ctx) => {
   if (data.startsWith('table_')) {
     const tableNum = parseInt(data.split('_')[1]);
     const table = userData.tables?.find(t => t.tableNumber === tableNum);
-    const price = 10 * Math.pow(2, tableNum - 1);
+    const price = TABLE_PRICES[tableNum as keyof typeof TABLE_PRICES];
     const earnings = price * 2.7;
     
     await ctx.answerCallbackQuery();
@@ -231,6 +231,47 @@ bot.on('callback_query:data', async (ctx) => {
     }
   }
   
+  // ПОКУПКА СТОЛА
+  if (data.startsWith('buy_table_')) {
+    const tableNum = parseInt(data.split('_')[2]);
+    const price = TABLE_PRICES[tableNum as keyof typeof TABLE_PRICES];
+    
+    await ctx.answerCallbackQuery();
+    
+    // Генерируем payment link
+    const paymentUrl = generatePaymentLink(userData.id, tableNum, userData.tonWallet);
+    const qrUrl = generatePaymentQR(paymentUrl);
+    
+    const paymentKeyboard = new InlineKeyboard()
+      .url('💳 Оплатить через TON Wallet', paymentUrl).row()
+      .text('✅ Я оплатил', `confirm_${tableNum}`).row()
+      .text('❌ Отмена', 'cancel_payment');
+    
+    await ctx.replyWithPhoto(qrUrl, {
+      caption:
+        `💳 Оплата Table ${tableNum}\n\n` +
+        `Сумма: ${price} TON\n\n` +
+        `1️⃣ Отсканируй QR код\n` +
+        `2️⃣ Или нажми кнопку "Оплатить"\n` +
+        `3️⃣ После оплаты нажми "Я оплатил"\n\n` +
+        `⏱ Активация в течение 1 минуты`,
+      reply_markup: paymentKeyboard
+    });
+  }
+  
+  // Подтверждение оплаты
+  if (data.startsWith('confirm_')) {
+    const tableNum = parseInt(data.split('_')[1]);
+    
+    await ctx.answerCallbackQuery({ text: '⏳ Проверяем оплату...' });
+    
+    await ctx.reply(
+      `⏳ Проверяем оплату Table ${tableNum}...\n\n` +
+      `Это может занять до 1 минуты.\n` +
+      `Мы уведомим тебя когда стол активируется!`
+    );
+  }
+  
   if (data === 'all_tables') {
     await ctx.answerCallbackQuery();
     
@@ -238,7 +279,7 @@ bot.on('callback_query:data', async (ctx) => {
     
     for (let i = 1; i <= 12; i++) {
       const table = userData.tables?.find(t => t.tableNumber === i);
-      const price = 10 * Math.pow(2, i - 1);
+      const price = TABLE_PRICES[i as keyof typeof TABLE_PRICES];
       const status = table ? `🟢 Цикл #${table.cycleNumber}` : '⚪️ Не куплен';
       message += `Table ${i} (${price} TON): ${status}\n`;
     }
@@ -248,5 +289,5 @@ bot.on('callback_query:data', async (ctx) => {
 });
 
 // Запуск бота
-console.log('🤖 Main Bot запущен с БД!');
+console.log('🤖 Main Bot запущен с покупкой столов!');
 bot.start();
