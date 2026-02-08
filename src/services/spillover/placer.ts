@@ -114,8 +114,14 @@ async function processPosition(
   }
   
   if (position === 2 || position === 3) {
-    // СЛОТЫ 2-3: Держим для автопокупки или выплачиваем
+    // СЛОТЫ 2-3: Держим для автопокупки
     console.log(`💼 Слот ${position}: держим ${amount} TON для автопокупки`);
+    
+    // Проверяем автопокупку после заполнения слота 3
+    if (position === 3) {
+      const { checkAndProcessAutoPurchase } = await import('../autopurchase/processor');
+      await checkAndProcessAutoPurchase(ownerId, tableNumber);
+    }
   }
   
   if (position === 4) {
