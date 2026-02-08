@@ -67,8 +67,16 @@ export async function placePartnerInTable(
   
   // Проверяем заполнен ли стол
   if (await isTableFull(tableId)) {
-    console.log(`🎉 Стол ${tableId} заполнен! Обрабатываем закрытие...`);
-    await handleTableClosure(tableId, tableOwnerId, tableNumber);
+    console.log(`🎉 Стол ${tableId} заполнен!`);
+    
+    // КРИТИЧНО: Проверяем это MASTER или обычный пользователь
+    if (tableOwnerId === 1) {
+      console.log(`👑 MASTER стол - НЕ закрываем, просто очищаем позиции`);
+      await handleMasterTableReset(tableId, tableNumber);
+    } else {
+      console.log(`👤 Обычный стол - обрабатываем закрытие и реактивацию`);
+      await handleTableClosure(tableId, tableOwnerId, tableNumber);
+    }
   }
 }
 
@@ -83,34 +91,32 @@ async function processPosition(
 ) {
   
   if (position === 1) {
-    // СЛОТ 1: Деньги владельцу СРАЗУ (для Table 2-12)
-    if (tableNumber > 1) {
-      console.log(`💰 Слот 1: выплата ${amount} TON владельцу ${ownerId}`);
-      
-      // Добавляем в pending_payouts для batch выплаты
-      await prisma.pendingPayout.create({
-        data: {
-          userId: ownerId,
-          amount: amount,
-          reason: 'slot_1',
-          tableNumber: tableNumber,
-          status: 'pending',
-          payoutMethod: 'BATCH'
+    // СЛОТ 1: Деньги владельцу СРАЗУ
+    console.log(`💰 Слот 1: выплата ${amount} TON владельцу ${ownerId}`);
+    
+    // Добавляем в pending_payouts для batch выплаты
+    await prisma.pendingPayout.create({
+      data: {
+        userId: ownerId,
+        amount: amount,
+        reason: 'slot_1',
+        tableNumber: tableNumber,
+        status: 'pending',
+        payoutMethod: 'BATCH'
+      }
+    });
+    
+    console.log(`📝 Добавлено в pending payouts`);
+    
+    // Обновляем статистику
+    await prisma.userStats.update({
+      where: { userId: ownerId },
+      data: {
+        totalEarned: {
+          increment: amount
         }
-      });
-      
-      console.log(`📝 Добавлено в pending payouts`);
-      
-      // Обновляем статистику
-      await prisma.userStats.update({
-        where: { userId: ownerId },
-        data: {
-          totalEarned: {
-            increment: amount
-          }
-        }
-      });
-    }
+      }
+    });
   }
   
   if (position === 2 || position === 3) {
@@ -118,7 +124,7 @@ async function processPosition(
     console.log(`💼 Слот ${position}: держим ${amount} TON для автопокупки`);
     
     // Проверяем автопокупку после заполнения слота 3
-    if (position === 3) {
+    if (position === 3 && ownerId !== 1) { // MASTER не нуждается в автопокупке
       const { checkAndProcessAutoPurchase } = await import('../autopurchase/processor');
       await checkAndProcessAutoPurchase(ownerId, tableNumber);
     }
@@ -130,7 +136,26 @@ async function processPosition(
   }
 }
 
-// Обработка закрытия стола
+// Обработка стола MASTER - просто очищаем позиции
+async function handleMasterTableReset(
+  tableId: number,
+  tableNumber: number
+) {
+  
+  console.log(`👑 Обработка MASTER стола ${tableId}...`);
+  
+  // ВАЖНО: MASTER столы НЕ обрабатывают spillover слота 4
+  // Просто очищаем все позиции и готовы принимать новых
+  
+  // ОЧИЩАЕМ позиции (MASTER стол остаётся активным)
+  await prisma.tablePosition.deleteMany({
+    where: { tableId: tableId }
+  });
+  
+  console.log(`✅ MASTER Table ${tableNumber} очищен, готов принимать новых партнёров\n`);
+}
+
+// Обработка закрытия стола (для обычных пользователей)
 async function handleTableClosure(
   tableId: number,
   ownerId: number,
@@ -191,7 +216,7 @@ async function handleTableClosure(
     );
   }
   
-  // Партнёр из слота 4 делает spillover
+  // Партнёр из слота 4 делает spillover (только для обычных пользователей!)
   const slot4Partner = table.positions.find(p => p.position === 4);
   if (slot4Partner) {
     console.log(`🔄 Партнёр ${slot4Partner.partnerUserId} из слота 4 делает spillover`);
