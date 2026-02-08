@@ -14,18 +14,28 @@ const mainKeyboard = new Keyboard()
   .text('📖 Помощь')
   .resized();
 
-// Команда /start
+// Команда /start с реферальной ссылкой
 bot.command('start', async (ctx) => {
   if (!ctx.from) return;
   
   const firstName = ctx.from.first_name || 'User';
   const telegramId = ctx.from.id;
   
+  // Парсим реферальный код из /start ref123
+  const args = ctx.message?.text?.split(' ');
+  let referralCode: string | undefined;
+  
+  if (args && args.length > 1) {
+    referralCode = args[1];
+    console.log(`📎 Реферальный код: ${referralCode}`);
+  }
+  
+  // Регистрация или получение пользователя из БД
   const user = await findOrCreateUser(telegramId, {
     username: ctx.from.username,
     firstName: ctx.from.first_name,
     isPremium: ctx.from.is_premium
-  });
+  }, referralCode);
   
   await ctx.reply(
     `👋 Привет, ${firstName}!\n\n` +
@@ -238,7 +248,6 @@ bot.on('callback_query:data', async (ctx) => {
     
     await ctx.answerCallbackQuery();
     
-    // Генерируем payment link
     const paymentUrl = generatePaymentLink(userData.id, tableNum, userData.tonWallet);
     const qrUrl = generatePaymentQR(paymentUrl);
     
@@ -259,7 +268,6 @@ bot.on('callback_query:data', async (ctx) => {
     });
   }
   
-  // Подтверждение оплаты
   if (data.startsWith('confirm_')) {
     const tableNum = parseInt(data.split('_')[1]);
     
@@ -288,6 +296,5 @@ bot.on('callback_query:data', async (ctx) => {
   }
 });
 
-// Запуск бота
-console.log('🤖 Main Bot запущен с покупкой столов!');
+console.log('🤖 Main Bot запущен с реферальной системой!');
 bot.start();
