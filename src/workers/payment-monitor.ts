@@ -1,7 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { getWalletTransactions, parseTransactionComment } from '../services/ton/client';
+import { getWalletTransactions } from '../services/ton/client';
 import { SYSTEM_WALLETS, TABLE_PRICES } from '../services/ton/config';
 import { activateTable } from '../services/ton/payment';
+import { notifyTableActivated } from '../services/notification/telegram';
 
 const prisma = new PrismaClient();
 
@@ -92,6 +93,7 @@ async function checkWallet(walletAddress: string, walletType: string) {
       
       console.log(`✅ НАЙДЕН ПЛАТЁЖ: Table ${tableNumber} от User ${userId}, сумма ${amount} TON`);
       
+      // Сохраняем транзакцию
       await prisma.transaction.create({
         data: {
           txHash: txHash,
@@ -106,8 +108,24 @@ async function checkWallet(walletAddress: string, walletType: string) {
         }
       });
       
+      // Активируем стол
       await activateTable(userId, tableNumber, txHash);
       console.log(`🎉 Table ${tableNumber} АКТИВИРОВАН для User ${userId}!`);
+      
+      // Получаем данные пользователя для уведомления
+      const user = await prisma.user.findUnique({
+        where: { id: userId }
+      });
+      
+      if (user) {
+        // Отправляем уведомление
+        await notifyTableActivated(
+          Number(user.telegramId),
+          tableNumber,
+          1
+        );
+        console.log(`🔔 Уведомление отправлено User ${userId}`);
+      }
       
     } catch (error) {
       console.error('❌ Ошибка обработки транзакции:', error);
