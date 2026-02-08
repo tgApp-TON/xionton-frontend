@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Тёмный космический фон */
+body {
+  background: #0a0520;
+  min-height: 100vh;
+}
+
+/* Чёрно-белый режим */
+.grayscale-mode {
+  filter: grayscale(100%);
+}
+
+.grayscale-mode * {
+  transition: filter 0.3s ease;
+}
+
+/* Градиентная анимация для кнопок */
+@keyframes gradient-rotate {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes gradient-rotate-dark {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-rotate {
+  background-size: 200% 200%;
+  animation: gradient-rotate 3s ease infinite;
+}
+
+.animate-gradient-rotate-dark {
+  background-size: 200% 200%;
+  animation: gradient-rotate-dark 3s ease infinite;
+}
+
+/* Анимация появления пунктов меню */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Неоновая пульсация (для ЧБ режима) */
+@keyframes neon-pulse {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: brightness(1) saturate(1.2);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: brightness(1.2) saturate(1.5);
+    box-shadow: 0 0 30px rgba(34, 211, 238, 0.8), 0 0 60px rgba(168, 85, 247, 0.5);
+  }
+}
+
+/* Чёрная пульсация (для цветного режима) */
+@keyframes dark-pulse {
+  0%, 100% {
+    background-position: 0% 50%;
+    filter: brightness(0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    background-position: 100% 50%;
+    filter: brightness(1);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+  }
+}
+
+.animate-neon-pulse {
+  background-size: 200% 200%;
+  animation: neon-pulse 3s ease infinite;
+}
+
+.animate-dark-pulse {
+  background-size: 200% 200%;
+  animation: dark-pulse 3s ease infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
