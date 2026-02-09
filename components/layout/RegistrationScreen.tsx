@@ -176,13 +176,18 @@ export function RegistrationScreen({ onComplete }: RegistrationScreenProps) {
       const username = tg?.initDataUnsafe?.user?.username || nickname;
       
       // Register user in database
-      await registerUser({
+      const result = await registerUser({
         telegramId,
         username,
         nickname,
         referralCode: finalReferralCode,
         country: country || 'US'
       });
+      
+      // Save userId to localStorage after successful registration
+      if (result.success && result.user) {
+        localStorage.setItem('matrix_ton_user_id', result.user.id.toString());
+      }
       
       // Continue with existing flow
       onComplete();

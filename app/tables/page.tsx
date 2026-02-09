@@ -8,99 +8,39 @@ import { Table, TABLE_PRICES } from '@/lib/types';
 import { Wallet, Users, TrendingUp, Table as TableIcon } from 'lucide-react';
 
 export default function TablesPage() {
-  const [tables, setTables] = useState<Table[]>([]);
+  const [userTables, setUserTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('matrix_ton_user_id') || '1';
+    }
+    return '1';
+  });
 
   useEffect(() => {
-    setTables([
-      {
-        id: 1,
-        userId: 1,
-        tableNumber: 1,
-        status: 'ACTIVE',
-        cycleNumber: 12,
-        createdAt: new Date().toISOString(),
-        closedAt: null,
-        positions: [
-          { id: 1, tableId: 1, partnerUserId: 4, partnerNickname: 'Alice', position: 1, cycleNumber: 12, amountPaid: 9, amountReceived: 9, status: 'PAID_OUT', createdAt: new Date().toISOString() },
-          { id: 2, tableId: 1, partnerUserId: 5, partnerNickname: 'Bob', position: 2, cycleNumber: 12, amountPaid: 9, amountReceived: 0, status: 'HELD_FOR_AUTOPURCHASE', createdAt: new Date().toISOString() },
-          { id: 3, tableId: 1, partnerUserId: 7, partnerNickname: 'Charlie', position: 3, cycleNumber: 12, amountPaid: 9, amountReceived: 0, status: 'HELD_FOR_AUTOPURCHASE', createdAt: new Date().toISOString() },
-          { id: 4, tableId: 1, partnerUserId: 8, partnerNickname: 'Diana', position: 4, cycleNumber: 12, amountPaid: 9, amountReceived: 0, status: 'PLATFORM_INCOME', createdAt: new Date().toISOString() }
-        ]
-      },
-      {
-        id: 2,
-        userId: 1,
-        tableNumber: 2,
-        status: 'ACTIVE',
-        cycleNumber: 12,
-        createdAt: new Date().toISOString(),
-        closedAt: null,
-        positions: [
-          { id: 5, tableId: 2, partnerUserId: 9, partnerNickname: 'Eve', position: 1, cycleNumber: 12, amountPaid: 18, amountReceived: 18, status: 'PAID_OUT', createdAt: new Date().toISOString() },
-          { id: 6, tableId: 2, partnerUserId: 10, partnerNickname: 'Frank', position: 2, cycleNumber: 12, amountPaid: 18, amountReceived: 0, status: 'HELD_FOR_AUTOPURCHASE', createdAt: new Date().toISOString() }
-        ]
-      },
-      {
-        id: 3,
-        userId: 1,
-        tableNumber: 3,
-        status: 'ACTIVE',
-        cycleNumber: 3,
-        createdAt: new Date().toISOString(),
-        closedAt: null,
-        positions: []
-      },
-      {
-        id: 4,
-        userId: 1,
-        tableNumber: 4,
-        status: 'ACTIVE',
-        cycleNumber: 13,
-        createdAt: new Date().toISOString(),
-        closedAt: null,
-        positions: []
-      },
-      {
-        id: 5,
-        userId: 1,
-        tableNumber: 5,
-        status: 'ACTIVE',
-        cycleNumber: 3,
-        createdAt: new Date().toISOString(),
-        closedAt: null,
-        positions: []
-      },
-      {
-        id: 6,
-        userId: 1,
-        tableNumber: 6,
-        status: 'ACTIVE',
-        cycleNumber: 3,
-        createdAt: new Date().toISOString(),
-        closedAt: null,
-        positions: []
-      },
-    ]);
-    setLoading(false);
-  }, []);
+    const fetchTables = async () => {
+      try {
+        const response = await fetch(`/api/user/tables?userId=${userId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          setUserTables(data.tables);
+        }
+      } catch (error) {
+        console.error('Failed to fetch tables:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400 mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading tables...</p>
-        </div>
-      </div>
-    );
-  }
+    fetchTables();
+  }, [userId]);
 
-  const activeTables = tables.filter(t => t.status === 'ACTIVE');
+  const activeTables = userTables.filter(t => t.status === 'ACTIVE');
   const activeTableNumbers = activeTables.map(t => t.tableNumber);
   const totalEarned = 156.8;
   const totalReferrals = 47;
-  const totalCycles = tables.reduce((sum, t) => sum + t.cycleNumber, 0);
+  const totalCycles = userTables.reduce((sum, t) => sum + t.cycleNumber, 0);
 
   return (
     <div className="min-h-screen relative">
@@ -136,32 +76,40 @@ export default function TablesPage() {
           padding: '0 40px',
           marginBottom: '3rem'
         }}>
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((tableNumber) => {
-            const table = tables.find(t => t.tableNumber === tableNumber);
-            const isActive = activeTableNumbers.includes(tableNumber);
-            const price = TABLE_PRICES[tableNumber];
-            const positions = table?.positions || [];
-            const cycles = table?.cycleNumber || 0;
+          {loading ? (
+            <div className="col-span-2 text-center text-white text-xl py-12">
+              Loading tables...
+            </div>
+          ) : (
+            userTables.length > 0 ? (
+              userTables.map((table) => {
+                const isActive = table.status === 'ACTIVE';
+                const price = TABLE_PRICES[table.tableNumber - 1];
+                const slots: [(any | null)?, (any | null)?, (any | null)?, (any | null)?] = [
+                  table.positions.find((p: any) => p.position === 1) || null,
+                  table.positions.find((p: any) => p.position === 2) || null,
+                  table.positions.find((p: any) => p.position === 3) || null,
+                  table.positions.find((p: any) => p.position === 4) || null
+                ];
 
-            const slots: any[] = [
-              positions.find(p => p.position === 1),
-              positions.find(p => p.position === 2),
-              positions.find(p => p.position === 3),
-              positions.find(p => p.position === 4)
-            ];
-
-            return (
-              <div key={tableNumber} className="w-full">
-                <CanvasTableCard
-                  tableNumber={tableNumber}
-                  price={price}
-                  cycles={cycles}
-                  slots={slots}
-                  isActive={isActive}
-                />
+                return (
+                  <div key={table.id} className="w-full">
+                    <CanvasTableCard
+                      tableNumber={table.tableNumber}
+                      price={price}
+                      cycles={table.cycleNumber}
+                      slots={slots}
+                      isActive={isActive}
+                    />
+                  </div>
+                );
+              })
+            ) : (
+              <div className="col-span-2 text-center text-white text-xl py-12">
+                No tables found
               </div>
-            );
-          })}
+            )
+          )}
         </div>
       </div>
     </div>
