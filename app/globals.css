@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.stars-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  overflow: hidden;
+}
+
+.stars-bg::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
+  filter: blur(60px);
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.stars-bg::after {
+  content: '';
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+  filter: blur(60px);
+  animation: pulse 4s ease-in-out infinite 1s;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.light-theme {
+  filter: grayscale(100%);
+}
+
+.light-theme .stars-bg {
+  background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%);
+}
+
+.light-theme .stars-bg::before {
+  background: radial-gradient(circle, rgba(200, 200, 200, 0.3) 0%, transparent 70%);
+}
+
+.light-theme .stars-bg::after {
+  background: radial-gradient(circle, rgba(150, 150, 150, 0.3) 0%, transparent 70%);
+}
+
+.light-theme * {
+  color: #e0e0e0 !important;
+}
+
+.light-theme button,
+.light-theme a,
+.light-theme canvas {
+  filter: grayscale(100%) !important;
+}
+
+.menu-text * {
+  color: #ffffff !important;
+}
+
+body {
+  font-size: 115%; /* 15% larger text */
+}
+
+/* Scale all UI elements except buttons */
+.container, .grid, .card {
+  transform: scale(1.15);
+  transform-origin: top center;
+}
+
+@media (max-width: 768px) {
+  /* Scale down UI elements on mobile */
+  button {
+    transform: scale(0.85);
+  }
+}
