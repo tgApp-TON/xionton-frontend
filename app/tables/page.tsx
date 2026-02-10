@@ -38,7 +38,7 @@ export default function TablesPage() {
     <div className="min-h-screen relative">
       <ScrollButtons />
       <div className="container mx-auto p-4 max-w-5xl relative z-10">
-        <div className="grid grid-cols-2 gap-3 max-w-full mx-auto px-4 mb-12" style={{ paddingTop: '90px', marginLeft: '16px' }}>
+        <div className="grid grid-cols-2 gap-3 max-w-full mx-auto px-4 mb-12" style={{ paddingTop: '90px', marginLeft: '28px' }}>
           {loading ? (
             <div className="col-span-2 text-center text-white text-xl py-12">
               Loading tables...
@@ -86,11 +86,11 @@ export default function TablesPage() {
               };
 
               return (
-                <div key={table.id} className="w-full" style={{ paddingLeft: '8px', paddingRight: '8px' }}>
+                <div key={table.id} className="w-full" style={{ paddingLeft: '12px', paddingRight: '12px' }}>
                   <CanvasTableCard
                     tableNumber={table.tableNumber}
                     price={price}
-                    cycles={table.cycleNumber}
+                    cycles={table.cycleNumber - 1}
                     slots={slots}
                     isActive={isActive}
                     isUnlocked={isUnlocked}
