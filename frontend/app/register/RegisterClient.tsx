@@ -27,10 +27,9 @@ export function RegisterClient() {
   const [checkingNickname, setCheckingNickname] = useState(false);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
+  const [authCheckDone, setAuthCheckDone] = useState<boolean | null>(null);
 
-  // When opened in browser (no Telegram WebApp), use mock id for testing (unique per session so flow won't be skipped)
-  const [mockId] = useState(() => Date.now());
-  const telegramId = (typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.id ?? user?.id : user?.id) ?? mockId;
+  const telegramId = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.id ?? user?.id : user?.id;
   const telegramUsername = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.username ?? user?.username : user?.username;
   const isPremiumUser = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.is_premium ?? isPremium : isPremium;
 
@@ -40,16 +39,18 @@ export function RegisterClient() {
   }, []);
 
   useEffect(() => {
+    if (!telegramId) return;
     const checkRegistered = async () => {
-      if (!telegramId) return;
       try {
         const res = await fetch(`/api/auth/check?telegramId=${telegramId}`);
         const data = await res.json();
         if (data.registered) {
           router.replace('/tables');
+        } else {
+          setAuthCheckDone(false);
         }
       } catch {
-        // ignore
+        setAuthCheckDone(false);
       }
     };
     checkRegistered();
@@ -214,6 +215,39 @@ export function RegisterClient() {
     fontWeight: 600,
     cursor: 'pointer',
   };
+
+  if (!telegramId) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ padding: '2rem' }}>
+        <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.125rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+          Please open this app via Telegram bot
+        </p>
+        <a
+          href="https://t.me/MatrixTON_Bot"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            padding: '1rem 1.5rem',
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+            borderRadius: '0.75rem',
+            color: '#fff',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}
+        >
+          t.me/MatrixTON_Bot
+        </a>
+      </div>
+    );
+  }
+
+  if (authCheckDone === null) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative" style={{ paddingTop: '70px' }}>
