@@ -29,6 +29,8 @@ export function RegisterClient() {
   const [registering, setRegistering] = useState(false);
 
   const telegramId = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.id ?? user?.id : user?.id;
+
+  console.log('[RegisterClient] mounted, telegramId:', telegramId);
   const telegramUsername = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.username ?? user?.username : user?.username;
   const isPremiumUser = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.is_premium ?? isPremium : isPremium;
 
