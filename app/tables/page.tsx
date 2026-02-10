@@ -74,7 +74,7 @@ export default function TablesPage() {
             gridTemplateColumns: '1fr 1fr',
             width: 'fit-content',
             margin: '0 auto',
-            gap: '2px',
+            gap: '0px',
           }}
         >
           {loading ? (
@@ -145,7 +145,7 @@ export default function TablesPage() {
               };
 
               return (
-                <div key={table.id} style={{ width: '45vw' }}>
+                <div key={table.id} style={{ width: '44vw' }}>
                   <CanvasTableCard
                     tableNumber={table.tableNumber}
                     price={price}
