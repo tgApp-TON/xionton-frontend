@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     // Get positions for each table
     const tablesWithPositions = await Promise.all(
-      (tables || []).map(async (table) => {
+      (tables || []).map(async (table: any) => {
         const { data: positions } = await supabase
           .from('TablePosition')
           .select('id, position, partnerUserId, amountPaid, status')
