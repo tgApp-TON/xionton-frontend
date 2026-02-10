@@ -70,10 +70,11 @@ export default function TablesPage() {
         <div
           className="grid grid-cols-2 pt-[90px] mb-12"
           style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            width: 'fit-content',
             margin: '0 auto',
-            width: 'calc(100% - 8px)',
-            padding: '0',
-            gap: '0px',
+            gap: '2px',
           }}
         >
           {loading ? (
@@ -144,7 +145,7 @@ export default function TablesPage() {
               };
 
               return (
-                <div key={table.id} className="w-full">
+                <div key={table.id} style={{ width: '47vw' }}>
                   <CanvasTableCard
                     tableNumber={table.tableNumber}
                     price={price}
