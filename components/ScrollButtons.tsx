@@ -1,18 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Sun, Moon } from 'lucide-react';
 import { AnimatedBackground } from '@/components/layout/AnimatedBackground';
 
 export function ScrollButtons() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<any>(null);
+  const [isDark, setIsDark] = useState(true);
   const [userTables, setUserTables] = useState<any[]>([]);
+
+  const toggleTheme = () => {
+    setIsDark(!isDark);
+    document.documentElement.classList.toggle('light-theme');
+  };
 
   useEffect(() => {
     const userId = localStorage.getItem('matrix_ton_user_id') || '1';
-    
-    // Fetch tables
     fetch(`/api/user/tables?userId=${userId}`)
       .then(r => r.json())
       .then(data => { if (data.success) setUserTables(data.tables); });
@@ -23,6 +26,22 @@ export function ScrollButtons() {
 
   return (
     <>
+      {/* Theme Button - TOP LEFT */}
+      <div style={{ position: 'fixed', top: '24px', left: '24px', zIndex: 99999, width: '128px', height: '128px' }}>
+        <button
+          onClick={toggleTheme}
+          style={{
+            width: '128px', height: '128px', borderRadius: '50%',
+            background: 'rgba(139, 92, 246, 0.2)', backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(139, 92, 246, 0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', transition: 'all 0.3s'
+          }}
+        >
+          {isDark ? <Sun size={48} className="text-purple-300" /> : <Moon size={48} className="text-purple-300" />}
+        </button>
+      </div>
+
       {/* Menu Button - TOP RIGHT */}
       <div style={{ position: 'fixed', top: '24px', right: '24px', zIndex: 99999, width: '128px', height: '128px' }}>
         <button
@@ -59,7 +78,6 @@ export function ScrollButtons() {
           }} className="p-12 menu-text">
             <AnimatedBackground />
             <div className="flex flex-col h-full relative z-10">
-              {/* Close button */}
               <button
                 onClick={() => setIsMenuOpen(false)}
                 style={{
@@ -74,7 +92,7 @@ export function ScrollButtons() {
                 <X size={48} className="text-purple-300" />
               </button>
 
-              {/* Stats Grid */}
+              {/* Stats */}
               <div className="flex flex-col gap-12 mb-20" style={{ marginTop: '60px' }}>
                 <div className="p-10 rounded-2xl bg-gradient-to-br from-cyan-600/20 to-blue-600/20 min-h-[200px]">
                   <div className="flex items-center justify-between">
@@ -82,7 +100,6 @@ export function ScrollButtons() {
                     <div className="text-white font-bold" style={{ fontSize: '6rem' }}>{activeTables}/12</div>
                   </div>
                 </div>
-
                 <div className="p-10 rounded-2xl bg-gradient-to-br from-green-600/20 to-emerald-600/20 min-h-[200px]">
                   <div className="flex items-center justify-between">
                     <div className="text-white" style={{ fontSize: '3.75rem' }}>Total Cycles</div>
