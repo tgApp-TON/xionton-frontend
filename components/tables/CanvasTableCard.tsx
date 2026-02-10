@@ -34,10 +34,10 @@ export function CanvasTableCard({
     if (!canvasRef.current || !containerRef.current) return;
 
     const calculateSize = () => {
-      if (!containerRef.current) return { width: 495, height: 560 };
+      if (!containerRef.current) return { width: 495, height: 620 };
       
       const containerWidth = containerRef.current.clientWidth;
-      const aspectRatio = 560 / 495; // Slightly taller aspect ratio
+      const aspectRatio = 620 / 495; // Taller aspect ratio
       const width = containerWidth;
       const height = width * aspectRatio;
       
@@ -79,7 +79,7 @@ export function CanvasTableCard({
           cyclesClosed: options.cyclesClosed ?? 12,
           slots: options.slots ?? [null, null, null, null],
           width: currentWidth,
-          height: options.height ?? 560,
+          height: options.height ?? 620,
           animate: options.animate ?? true,
           isActive: options.isActive ?? true,
           isUnlocked: options.isUnlocked ?? false,
