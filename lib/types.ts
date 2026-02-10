@@ -50,5 +50,5 @@ export const TABLE_PRICES: Record<number, number> = {
   9: 2560,
   10: 5120,
   11: 10240,
-  12: 20480,
+  12: 20480
 };
