@@ -74,8 +74,8 @@ export default function TablesPage() {
             width: '100%',
             maxWidth: '100%',
             paddingTop: '90px',
-            paddingLeft: '16px',
-            paddingRight: '16px',
+            paddingLeft: '8px',
+            paddingRight: '8px',
             marginBottom: '3rem',
           }}
         >
@@ -147,7 +147,7 @@ export default function TablesPage() {
               };
 
               return (
-                <div key={table.id} className="w-full">
+                <div key={table.id} className="w-full" style={{ paddingLeft: '4px', paddingRight: '4px' }}>
                   <CanvasTableCard
                     tableNumber={table.tableNumber}
                     price={price}
