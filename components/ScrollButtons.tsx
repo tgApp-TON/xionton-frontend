@@ -75,7 +75,7 @@ export function ScrollButtons() {
             position: 'fixed', top: 0, right: 0, height: '100%', width: '100%',
             zIndex: 99999, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
             overflowY: 'auto', color: '#ffffff', paddingTop: '120px', lineHeight: '1.8'
-          }} className="p-12 menu-text">
+          }} className="p-6 menu-text">
             <AnimatedBackground />
             <div className="flex flex-col h-full relative z-10">
               <button
@@ -93,30 +93,30 @@ export function ScrollButtons() {
               </button>
 
               {/* Stats */}
-              <div className="flex flex-col gap-12 mb-20" style={{ marginTop: '60px' }}>
-                <div className="p-10 rounded-2xl bg-gradient-to-br from-cyan-600/20 to-blue-600/20 min-h-[200px]">
+              <div className="flex flex-col gap-6 mb-8" style={{ marginTop: '30px' }}>
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-cyan-600/20 to-blue-600/20 min-h-[80px]">
                   <div className="flex items-center justify-between">
-                    <div className="text-white" style={{ fontSize: '3.75rem' }}>Active Tables</div>
-                    <div className="text-white font-bold" style={{ fontSize: '6rem' }}>{activeTables}/12</div>
+                    <div className="text-white" style={{ fontSize: '1.5rem' }}>Active Tables</div>
+                    <div className="text-white font-bold" style={{ fontSize: '2.5rem' }}>{activeTables}/12</div>
                   </div>
                 </div>
-                <div className="p-10 rounded-2xl bg-gradient-to-br from-green-600/20 to-emerald-600/20 min-h-[200px]">
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-green-600/20 to-emerald-600/20 min-h-[80px]">
                   <div className="flex items-center justify-between">
-                    <div className="text-white" style={{ fontSize: '3.75rem' }}>Total Cycles</div>
-                    <div className="text-white font-bold" style={{ fontSize: '6rem' }}>{totalCycles}</div>
+                    <div className="text-white" style={{ fontSize: '1.5rem' }}>Total Cycles</div>
+                    <div className="text-white font-bold" style={{ fontSize: '2.5rem' }}>{totalCycles}</div>
                   </div>
                 </div>
               </div>
 
               {/* Navigation */}
-              <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-4">
                 {[
                   { label: 'Tables', href: '/tables' },
                   { label: 'Referrals', href: '/referrals' },
                 ].map(item => (
                   <a key={item.href} href={item.href}
-                    className="p-10 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
-                    style={{ fontSize: '4.5rem', color: 'white', textDecoration: 'none' }}
+                    className="p-5 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
+                    style={{ fontSize: '1.8rem', color: 'white', textDecoration: 'none' }}
                   >
                     {item.label}
                   </a>
