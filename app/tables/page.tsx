@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CanvasTableCard } from '@/components/tables/CanvasTableCard';
 import { ScrollButtons } from '@/components/ScrollButtons';
 import { TABLE_PRICES } from '@/lib/types';
@@ -8,12 +8,40 @@ import { TABLE_PRICES } from '@/lib/types';
 export default function TablesPage() {
   const [userTables, setUserTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
   const [userId] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('matrix_ton_user_id') || '1';
     }
     return '1';
   });
+
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (loading) {
+      setProgress(0);
+      progressIntervalRef.current = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 95) {
+            if (progressIntervalRef.current) {
+              clearInterval(progressIntervalRef.current);
+              progressIntervalRef.current = null;
+            }
+            return 95;
+          }
+          return prev + 2;
+        });
+      }, 50);
+    }
+
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+        progressIntervalRef.current = null;
+      }
+    };
+  }, [loading]);
 
   useEffect(() => {
     const fetchTables = async () => {
@@ -26,6 +54,7 @@ export default function TablesPage() {
       } catch (error) {
         console.error('Failed to fetch tables:', error);
       } finally {
+        setProgress(100);
         setLoading(false);
       }
     };
@@ -40,8 +69,15 @@ export default function TablesPage() {
       <div className="container mx-auto p-4 max-w-5xl relative z-10">
         <div className="grid grid-cols-2 gap-3 max-w-full mx-auto px-4 mb-12" style={{ paddingTop: '90px', marginLeft: '28px' }}>
           {loading ? (
-            <div className="col-span-2 text-center text-white text-xl py-12">
-              Loading tables...
+            <div className="col-span-2 fixed inset-0 flex flex-col items-center justify-center z-20">
+              <p className="text-white text-3xl font-medium mb-4">Loading tables...</p>
+              <p className="text-white text-2xl font-semibold mb-3">{progress}%</p>
+              <div className="w-64 h-2 bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-purple-500 transition-all duration-75 ease-linear"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
           ) : userTables.length > 0 ? (
             userTables.map((table, index) => {
