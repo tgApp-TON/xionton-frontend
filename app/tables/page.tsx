@@ -67,7 +67,18 @@ export default function TablesPage() {
     <div className="min-h-screen relative">
       {!loading && <ScrollButtons />}
       <div className="container mx-auto p-4 max-w-5xl relative z-10">
-        <div className="grid grid-cols-2 gap-3 max-w-full mx-auto px-4 mb-12" style={{ paddingTop: '90px', marginLeft: '28px' }}>
+        <div
+          className="grid grid-cols-2 gap-3"
+          style={{
+            margin: '0 auto',
+            width: '100%',
+            maxWidth: '100%',
+            paddingTop: '90px',
+            paddingLeft: '16px',
+            paddingRight: '16px',
+            marginBottom: '3rem',
+          }}
+        >
           {loading ? (
             <div
               style={{
@@ -136,7 +147,7 @@ export default function TablesPage() {
               };
 
               return (
-                <div key={table.id} className="w-full" style={{ paddingLeft: '12px', paddingRight: '12px' }}>
+                <div key={table.id} className="w-full">
                   <CanvasTableCard
                     tableNumber={table.tableNumber}
                     price={price}
