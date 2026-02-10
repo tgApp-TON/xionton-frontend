@@ -27,7 +27,6 @@ export function RegisterClient() {
   const [checkingNickname, setCheckingNickname] = useState(false);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
-  const [authCheckDone, setAuthCheckDone] = useState<boolean | null>(null);
 
   const telegramId = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.id ?? user?.id : user?.id;
   const telegramUsername = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.username ?? user?.username : user?.username;
@@ -38,23 +37,24 @@ export function RegisterClient() {
     WebApp?.expand?.();
   }, []);
 
-  useEffect(() => {
-    if (!telegramId) return;
-    const checkRegistered = async () => {
-      try {
-        const res = await fetch(`/api/auth/check?telegramId=${telegramId}`);
-        const data = await res.json();
-        if (data.registered) {
-          router.replace('/tables');
-        } else {
-          setAuthCheckDone(false);
-        }
-      } catch {
-        setAuthCheckDone(false);
-      }
-    };
-    checkRegistered();
-  }, [telegramId, router]);
+  // Temporarily disabled: everyone goes through full 4-step registration flow
+  // useEffect(() => {
+  //   if (!telegramId) return;
+  //   const checkRegistered = async () => {
+  //     try {
+  //       const res = await fetch(`/api/auth/check?telegramId=${telegramId}`);
+  //       const data = await res.json();
+  //       if (data.registered) {
+  //         router.replace('/tables');
+  //       } else {
+  //         setAuthCheckDone(false);
+  //       }
+  //     } catch {
+  //       setAuthCheckDone(false);
+  //     }
+  //   };
+  //   checkRegistered();
+  // }, [telegramId, router]);
 
   useEffect(() => {
     if (telegramId && premiumChecked === null) {
@@ -237,14 +237,6 @@ export function RegisterClient() {
         >
           t.me/MatrixTON_Bot
         </a>
-      </div>
-    );
-  }
-
-  if (authCheckDone === null) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
       </div>
     );
   }
