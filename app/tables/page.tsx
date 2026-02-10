@@ -65,14 +65,29 @@ export default function TablesPage() {
 
   return (
     <div className="min-h-screen relative">
-      <ScrollButtons />
+      {!loading && <ScrollButtons />}
       <div className="container mx-auto p-4 max-w-5xl relative z-10">
         <div className="grid grid-cols-2 gap-3 max-w-full mx-auto px-4 mb-12" style={{ paddingTop: '90px', marginLeft: '28px' }}>
           {loading ? (
-            <div className="col-span-2 fixed inset-0 flex flex-col items-center justify-center z-50 bg-transparent">
-              <p style={{ color: 'white', fontSize: '1.5rem', marginBottom: '16px' }}>Loading tables...</p>
-              <p style={{ color: 'white', fontSize: '1.25rem', marginBottom: '12px' }}>{progress}%</p>
-              <div style={{ width: '200px', height: '8px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px' }}>
+            <div
+              style={{
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                right: '0',
+                bottom: '0',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 99999,
+                paddingTop: '0',
+                backgroundColor: 'transparent',
+              }}
+            >
+              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'white', marginBottom: '24px', textAlign: 'center' }}>Loading tables...</p>
+              <p style={{ fontSize: '1.5rem', color: 'white', marginBottom: '16px', textAlign: 'center' }}>{progress}%</p>
+              <div style={{ width: '250px', height: '8px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px' }}>
                 <div
                   style={{ width: `${progress}%`, height: '100%', backgroundColor: '#a855f7', borderRadius: '4px', transition: 'width 0.1s' }}
                 />
