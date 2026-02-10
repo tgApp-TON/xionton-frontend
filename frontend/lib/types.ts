@@ -1,3 +1,17 @@
+// Re-export everything from types/index.ts for convenience
+export * from './types/index';
+
+// Also export DashboardData and related types directly for easier imports
+export type {
+  DashboardData,
+  User,
+  UserStats,
+  Transaction,
+  PendingPayout,
+  Referral
+} from './types/index';
+
+// Keep these exports for backward compatibility
 export interface Table {
   id: number;
   userId: number;

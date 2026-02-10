@@ -30,7 +30,7 @@ export function TableCard({ tableNumber, price, table, isActive }: TableCardProp
       {/* 4 Слота в сетке 2x2 */}
       <div className="grid grid-cols-2 gap-3 mb-4">
         {[1, 2, 3, 4].map((slot) => {
-          const position = positions.find((p: { slotNumber: number }) => p.slotNumber === slot);
+          const position = positions.find((p) => p.position === slot);
           const isFilled = !!position;
           
           return (

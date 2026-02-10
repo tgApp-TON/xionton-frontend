@@ -1,13 +1,13 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/admin/check-master/route": "app/api/admin/check-master/route.js",
   "/api/admin/setup-master/route": "app/api/admin/setup-master/route.js",
-  "/api/user/register/route": "app/api/user/register/route.js",
+  "/api/referral/validate/route": "app/api/referral/validate/route.js",
   "/api/user/check-nickname/route": "app/api/user/check-nickname/route.js",
-  "/page": "app/page.js",
+  "/api/user/register/route": "app/api/user/register/route.js",
   "/api/user/tables/route": "app/api/user/tables/route.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/api/referral/validate/route": "app/api/referral/validate/route.js",
-  "/api/admin/check-master/route": "app/api/admin/check-master/route.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/tables/page": "app/tables/page.js"
+  "/tables/page": "app/tables/page.js",
+  "/page": "app/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js"
 }
