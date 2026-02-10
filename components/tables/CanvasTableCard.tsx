@@ -583,7 +583,7 @@ export function CanvasTableCard({
   }, [tableNumber, price, cycles, slots, isActive, isUnlocked, onBuy]);
 
   return (
-    <div ref={containerRef} className="w-full">
+    <div ref={containerRef} className="w-full" style={{ margin: 0, padding: 0 }}>
       <canvas ref={canvasRef} className="w-full h-auto" style={{ cursor: isUnlocked && !isActive ? 'pointer' : 'default' }} />
     </div>
   );

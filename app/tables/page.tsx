@@ -71,9 +71,9 @@ export default function TablesPage() {
           className="grid grid-cols-2 pt-[90px] mb-12"
           style={{
             margin: '0 auto',
-            width: '100%',
+            width: 'calc(100% - 8px)',
             padding: '0',
-            gap: '4px',
+            gap: '0px',
           }}
         >
           {loading ? (
