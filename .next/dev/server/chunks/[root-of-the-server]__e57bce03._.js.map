@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///Users/stanislavozarchuk/Projects/matrix-ton/frontend/app/api/user/check-nickname/route.ts"],"sourcesContent":["import { NextRequest, NextResponse } from 'next/server';\n\nexport async function GET(request: NextRequest) {\n  const searchParams = request.nextUrl.searchParams;\n  const nickname = searchParams.get('nickname');\n\n  if (!nickname) {\n    return NextResponse.json({ error: 'Nickname is required' }, { status: 400 });\n  }\n\n  // TODO: Check database for existing nickname\n  // For now, mock response - always available except 'test'\n  const takenNicknames = ['test', 'admin', 'support'];\n  const isTaken = takenNicknames.includes(nickname.toLowerCase());\n\n  return NextResponse.json({ \n    taken: isTaken,\n    available: !isTaken \n  });\n}\n"],"names":[],"mappings":";;;;AAAA;;AAEO,eAAe,IAAI,OAAoB;IAC5C,MAAM,eAAe,QAAQ,OAAO,CAAC,YAAY;IACjD,MAAM,WAAW,aAAa,GAAG,CAAC;IAElC,IAAI,CAAC,UAAU;QACb,OAAO,4JAAY,CAAC,IAAI,CAAC;YAAE,OAAO;QAAuB,GAAG;YAAE,QAAQ;QAAI;IAC5E;IAEA,6CAA6C;IAC7C,0DAA0D;IAC1D,MAAM,iBAAiB;QAAC;QAAQ;QAAS;KAAU;IACnD,MAAM,UAAU,eAAe,QAAQ,CAAC,SAAS,WAAW;IAE5D,OAAO,4JAAY,CAAC,IAAI,CAAC;QACvB,OAAO;QACP,WAAW,CAAC;IACd;AACF"}}]
-}

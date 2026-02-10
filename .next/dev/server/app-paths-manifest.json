@@ -1,7 +1,0 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/user/by-wallet/route": "app/api/user/by-wallet/route.js",
-  "/api/user/referrals/route": "app/api/user/referrals/route.js",
-  "/api/user/tables/route": "app/api/user/tables/route.js",
-  "/tables/page": "app/tables/page.js"
-}
