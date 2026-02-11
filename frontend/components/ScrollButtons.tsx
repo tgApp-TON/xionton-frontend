@@ -95,31 +95,13 @@ export function ScrollButtons() {
                 <X size={24} className="text-purple-300" />
               </button>
 
-              {/* Stats */}
-              <div className="flex flex-col mb-8">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.2rem', color: 'white', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-                  <span>Active Tables</span>
-                  <span>{activeTables}/12</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.2rem', color: 'white', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-                  <span>Total Cycles</span>
-                  <span>{totalCycles}</span>
-                </div>
-              </div>
-
-              {/* Wallet: click = connect (openModal) or disconnect */}
+              {/* Wallet: at top; button always opens modal; Disconnect link when connected */}
               <div className="flex flex-col mb-8">
                 <div style={{ fontSize: '1.2rem', color: 'white', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
                   Wallet
                 </div>
                 <button
-                  onClick={() => {
-                    if (tonAddress) {
-                      tonConnectUI.disconnect();
-                    } else {
-                      tonConnectUI.openModal();
-                    }
-                  }}
+                  onClick={() => tonConnectUI.openModal()}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -138,6 +120,36 @@ export function ScrollButtons() {
                   <Wallet size={20} style={{ color: '#a855f7', flexShrink: 0 }} />
                   {tonAddress ? `${tonAddress.slice(0, 6)}...${tonAddress.slice(-4)}` : 'Connect Wallet'}
                 </button>
+                {tonAddress && (
+                  <button
+                    type="button"
+                    onClick={() => tonConnectUI.disconnect()}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      marginTop: '8px',
+                      fontSize: '0.8rem',
+                      color: 'rgba(255,255,255,0.6)',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    Disconnect
+                  </button>
+                )}
+              </div>
+
+              {/* Stats */}
+              <div className="flex flex-col mb-8">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.2rem', color: 'white', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                  <span>Active Tables</span>
+                  <span>{activeTables}/12</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.2rem', color: 'white', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                  <span>Total Cycles</span>
+                  <span>{totalCycles}</span>
+                </div>
               </div>
 
               {/* Navigation */}
