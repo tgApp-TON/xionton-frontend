@@ -120,7 +120,11 @@ export function RegisterClient() {
   };
 
   const handleRegister = async () => {
-    if (!telegramId || !nickname || !tonAddress) return;
+    console.log('handleRegister called with:', { telegramId, nickname, tonAddress, nicknameAvailable });
+    if (!telegramId || !nickname || !tonAddress) {
+      setNicknameError(`Missing: telegramId=${telegramId}, nickname=${nickname}, tonAddress=${tonAddress}`);
+      return;
+    }
     setRegistering(true);
     try {
       const res = await fetch('/api/auth/register', {
