@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Sun, Moon } from 'lucide-react';
-import { TonConnectButton, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react';
 import { AnimatedBackground } from '@/components/layout/AnimatedBackground';
 
 export function ScrollButtons() {
@@ -10,7 +10,6 @@ export function ScrollButtons() {
   const [isDark, setIsDark] = useState(true);
   const [userTables, setUserTables] = useState<any[]>([]);
   const tonAddress = useTonAddress();
-  const [tonConnectUI] = useTonConnectUI();
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -107,34 +106,18 @@ export function ScrollButtons() {
                 </div>
               </div>
 
-              {/* Connect Wallet */}
+              {/* Wallet: always show TonConnectButton (connect / switch / disconnect via TonConnect UI) */}
               <div className="flex flex-col mb-8">
                 <div style={{ fontSize: '1.2rem', color: 'white', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-                  Connect Wallet
+                  Wallet
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-start' }}>
-                  <TonConnectButton />
                   {tonAddress && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', fontFamily: 'monospace' }}>
-                        {tonAddress.slice(0, 6)}...{tonAddress.slice(-4)}
-                      </span>
-                      <button
-                        onClick={() => tonConnectUI?.disconnect()}
-                        style={{
-                          padding: '8px 16px',
-                          fontSize: '0.9rem',
-                          background: 'rgba(239, 68, 68, 0.2)',
-                          border: '1px solid rgba(239, 68, 68, 0.5)',
-                          borderRadius: '0.5rem',
-                          color: '#f87171',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Disconnect
-                      </button>
-                    </div>
+                    <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', fontFamily: 'monospace' }}>
+                      {tonAddress.slice(0, 6)}...{tonAddress.slice(-4)}
+                    </span>
                   )}
+                  <TonConnectButton />
                 </div>
               </div>
 
