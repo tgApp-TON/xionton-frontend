@@ -28,7 +28,7 @@ export function RegisterClient() {
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
 
-  const telegramId = (typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.id ?? user?.id : user?.id) ?? 777777777;
+  const telegramId = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.id ?? user?.id : user?.id;
 
   console.log('[RegisterClient] mounted, telegramId:', telegramId);
   const telegramUsername = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.username ?? user?.username : user?.username;
@@ -210,6 +210,31 @@ export function RegisterClient() {
     cursor: 'pointer',
     marginTop: '1rem',
   };
+
+  if (!telegramId) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ padding: '2rem' }}>
+        <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.125rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+          Please open this app via Telegram bot
+        </p>
+        <a
+          href="https://t.me/MatrixTON_Bot"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            padding: '1rem 1.5rem',
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+            borderRadius: '0.75rem',
+            color: '#fff',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}
+        >
+          t.me/MatrixTON_Bot
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative" style={{ paddingTop: '70px' }}>
