@@ -6,9 +6,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { telegramId, telegramUsername, isPremium, nickname, tonWallet, referralCode } = body;
 
-    if (!telegramId || !nickname || !tonWallet) {
+    if (!telegramId || !nickname) {
       return NextResponse.json(
-        { error: 'telegramId, nickname, and tonWallet are required' },
+        { error: 'telegramId and nickname are required' },
         { status: 400 }
       );
     }
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         referralCode: referralCodeValue,
         isPremium: Boolean(isPremium),
         accountCreatedDate: new Date().toISOString(),
-        tonWallet: String(tonWallet),
+        tonWallet: tonWallet != null && String(tonWallet).trim() !== '' ? String(tonWallet).trim() : '',
         role: 'USER',
         isVerified: true,
       })

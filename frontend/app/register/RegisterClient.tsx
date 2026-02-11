@@ -119,10 +119,11 @@ export function RegisterClient() {
     }
   };
 
-  const handleRegister = async () => {
-    console.log('handleRegister called with:', { telegramId, nickname, tonAddress, nicknameAvailable });
-    if (!telegramId || !nickname || !tonAddress) {
-      setNicknameError(`Missing: telegramId=${telegramId}, nickname=${nickname}, tonAddress=${tonAddress}`);
+  const handleRegister = async (walletOverride?: string) => {
+    const walletToSend = walletOverride !== undefined ? walletOverride : (tonAddress ?? '');
+    console.log('handleRegister called with:', { telegramId, nickname, tonAddress, nicknameAvailable, walletToSend });
+    if (!telegramId || !nickname) {
+      setNicknameError(`Missing: telegramId=${telegramId}, nickname=${nickname}`);
       return;
     }
     setRegistering(true);
@@ -135,7 +136,7 @@ export function RegisterClient() {
           telegramUsername: telegramUsername || undefined,
           isPremium: isPremiumUser,
           nickname,
-          tonWallet: tonAddress,
+          tonWallet: walletToSend,
           referralCode: referralCode || 'MASTER',
         }),
       });
@@ -415,6 +416,23 @@ export function RegisterClient() {
                 }}
               >
                 Complete Registration
+              </button>
+            )}
+            {!registering && (
+              <button
+                onClick={() => handleRegister('')}
+                style={{
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.7)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '0.75rem',
+                  padding: '12px 32px',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  marginTop: '0.75rem',
+                }}
+              >
+                Skip for now →
               </button>
             )}
           </div>

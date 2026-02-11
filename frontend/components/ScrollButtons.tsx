@@ -1,156 +1,70 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Table, Users, TrendingUp, Settings, Sun, Moon } from 'lucide-react';
+import { X, Sun, Moon } from 'lucide-react';
+import { TonConnectButton, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 import { AnimatedBackground } from '@/components/layout/AnimatedBackground';
 
 export function ScrollButtons() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
-  const [userStats, setUserStats] = useState({
-    totalEarned: 0,
-    activeTables: 0,
-    directReferrals: 0, // Personal workers
-    totalReferrals: 0,  // Entire tree
-    totalCycles: 0
-  });
-  const [referralsList, setReferralsList] = useState<any[]>([]);
-  const [upline, setUpline] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchUserStats = async () => {
-      const userId = localStorage.getItem('matrix_ton_user_id') || '1';
-      
-      // Fetch tables
-      const tablesRes = await fetch(`/api/user/tables?userId=${userId}`);
-      const tablesData = await tablesRes.json();
-      
-      if (tablesData.success) {
-        const activeTables = tablesData.tables.filter((t: any) => t.status === 'ACTIVE').length;
-        const totalCycles = tablesData.tables.reduce((sum: number, t: any) => sum + t.cycleNumber, 0);
-        
-        setUserStats(prev => ({
-          ...prev,
-          totalEarned: 0, // TODO: calculate from transactions
-          activeTables,
-          totalCycles
-        }));
-      }
-
-      // Fetch referrals
-      const referralsRes = await fetch(`/api/user/referrals?userId=${userId}`);
-      const referralsData = await referralsRes.json();
-
-      if (referralsData.success) {
-        setUserStats(prev => ({
-          ...prev,
-          directReferrals: referralsData.directCount,
-          totalReferrals: referralsData.totalTreeCount
-        }));
-        
-        // Save first 3 referrals for display
-        setReferralsList(referralsData.directReferrals.slice(0, 3));
-        setUpline(referralsData.upline); // Save upline
-      }
-    };
-    
-    if (isMenuOpen) {
-      fetchUserStats();
-    }
-  }, [isMenuOpen]);
+  const [userTables, setUserTables] = useState<any[]>([]);
+  const tonAddress = useTonAddress();
+  const [tonConnectUI] = useTonConnectUI();
 
   const toggleTheme = () => {
     setIsDark(!isDark);
     document.documentElement.classList.toggle('light-theme');
   };
 
+  useEffect(() => {
+    const userId = localStorage.getItem('matrix_ton_user_id') || '1';
+    fetch(`/api/user/tables?userId=${userId}`)
+      .then(r => r.json())
+      .then(data => { if (data.success) setUserTables(data.tables); });
+  }, []);
+
+  const activeTables = userTables.filter(t => t.status === 'ACTIVE').length;
+  const totalCycles = userTables.reduce((sum, t) => sum + (t.cycleNumber || 0), 0);
+
   return (
     <>
       {/* Theme Button - TOP LEFT */}
-      <div style={{ 
-        position: 'fixed', 
-        top: '24px', 
-        left: '24px',
-        zIndex: 99999,
-        width: '128px',
-        height: '128px'
-      }}>
+      <div style={{ position: 'fixed', top: '12px', left: '12px', zIndex: 99999, width: '56px', height: '56px' }}>
         <button
           onClick={toggleTheme}
           style={{
-            width: '128px',
-            height: '128px',
-            borderRadius: '50%',
-            background: 'rgba(139, 92, 246, 0.2)',
-            backdropFilter: 'blur(10px)',
+            width: '56px', height: '56px', borderRadius: '50%',
+            background: 'rgba(139, 92, 246, 0.2)', backdropFilter: 'blur(10px)',
             border: '1px solid rgba(139, 92, 246, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.3s'
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', transition: 'all 0.3s'
           }}
         >
-          {isDark ? <Sun size={48} className="text-purple-300" /> : <Moon size={48} className="text-purple-300" />}
+          {isDark ? <Sun size={24} className="text-purple-300" /> : <Moon size={24} className="text-purple-300" />}
         </button>
       </div>
 
       {/* Menu Button - TOP RIGHT */}
-      <div 
-        style={{ 
-          position: 'fixed', 
-          top: '24px', 
-          right: '24px', 
-          zIndex: 99999,
-          width: '128px',
-          height: '128px'
-        }}
-      >
+      <div style={{ position: 'fixed', top: '12px', right: '12px', zIndex: 99999, width: '56px', height: '56px' }}>
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: '50%',
-            background: 'rgba(30, 30, 50, 0.3)',
-            backdropFilter: 'blur(10px)',
+            width: '100%', height: '100%', borderRadius: '50%',
+            background: 'rgba(30, 30, 50, 0.3)', backdropFilter: 'blur(10px)',
             border: '1px solid rgba(139, 92, 246, 0.5)',
             boxShadow: '0 8px 32px rgba(139, 92, 246, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.3s'
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', transition: 'all 0.3s'
           }}
         >
           {isMenuOpen ? (
-            <X size={48} className="text-purple-300" />
+            <X size={24} className="text-purple-300" />
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'center' }}>
-              <div 
-                style={{ 
-                  width: '56px',
-                  height: '6px',
-                  background: 'rgba(168, 85, 247, 0.9)',
-                  borderRadius: '10px'
-                }}
-              />
-              <div 
-                style={{ 
-                  width: '56px',
-                  height: '6px',
-                  background: 'rgba(168, 85, 247, 0.9)',
-                  borderRadius: '10px'
-                }}
-              />
-              <div 
-                style={{ 
-                  width: '56px',
-                  height: '6px',
-                  background: 'rgba(168, 85, 247, 0.9)',
-                  borderRadius: '10px'
-                }}
-              />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
+              {[0,1,2].map(i => (
+                <div key={i} style={{ width: '28px', height: '3px', background: 'rgba(168, 85, 247, 0.9)', borderRadius: '10px' }} />
+              ))}
             </div>
           )}
         </button>
@@ -159,177 +73,84 @@ export function ScrollButtons() {
       {/* Side Menu Panel */}
       {isMenuOpen && (
         <>
-          <div 
-            style={{ 
-              position: 'fixed',
-              inset: 0,
-              backgroundColor: 'rgba(0, 0, 0, 0.7)',
-              zIndex: 99998
-            }}
-          />
-          <div 
-            style={{ 
-              position: 'fixed',
-              top: 0,
-              right: 0,
-              height: '100%',
-              width: '100%',
-              zIndex: 99999,
-              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-              overflowY: 'auto',
-              color: '#ffffff',
-              paddingTop: '120px',
-              lineHeight: '1.8'
-            }}
-            className="p-12 menu-text"
-          >
+          <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 99998 }} onClick={() => setIsMenuOpen(false)} />
+          <div style={{
+            position: 'fixed', top: 0, right: 0, height: '100%', width: '100%',
+            zIndex: 99999, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            overflowY: 'auto', color: '#ffffff', paddingTop: '120px', lineHeight: '1.8'
+          }} className="p-6 menu-text">
             <AnimatedBackground />
-            <div className="flex flex-col h-full relative z-10">
-              {/* Header */}
-              <div className="relative mb-20">
-                <div>
-                  <p className="text-purple-300" style={{ fontSize: '4.5rem' }}>@CryptoKing</p>
-                </div>
-                
-                {/* Close button - matches menu button style exactly */}
-                <button
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{
-                    position: 'fixed',
-                    top: '24px',
-                    right: '24px',
-                    width: '128px',
-                    height: '128px',
-                    borderRadius: '50%',
-                    background: 'rgba(139, 92, 246, 0.2)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(139, 92, 246, 0.4)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s',
-                    zIndex: 100000
-                  }}
-                >
-                  <X size={48} className="text-purple-300" />
-                </button>
-              </div>
+            <div className="flex flex-col h-full relative z-10" style={{ paddingTop: '80px' }}>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                style={{
+                  position: 'fixed', top: '12px', right: '12px',
+                  width: '56px', height: '56px', borderRadius: '50%',
+                  background: 'rgba(139, 92, 246, 0.2)', backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(139, 92, 246, 0.4)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', zIndex: 100000
+                }}
+              >
+                <X size={24} className="text-purple-300" />
+              </button>
 
-              {/* Stats Grid */}
-              <div className="flex flex-col gap-12 mb-20">
-                <div className="p-10 rounded-2xl bg-gradient-to-br from-purple-600/20 to-pink-600/20 min-h-[200px]">
-                  <div className="flex items-center justify-between">
-                    <div className="text-white" style={{ fontSize: '3.75rem' }}>Total Earned</div>
-                    <div className="text-white font-bold" style={{ fontSize: '6rem' }}>{userStats.totalEarned} TON</div>
-                  </div>
+              {/* Stats */}
+              <div className="flex flex-col mb-8">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.2rem', color: 'white', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                  <span>Active Tables</span>
+                  <span>{activeTables}/12</span>
                 </div>
-                
-                <div className="p-10 rounded-2xl bg-gradient-to-br from-cyan-600/20 to-blue-600/20 min-h-[200px]">
-                  <div className="flex items-center justify-between">
-                    <div className="text-white" style={{ fontSize: '3.75rem' }}>Active Tables</div>
-                    <div className="text-white font-bold" style={{ fontSize: '6rem' }}>{userStats.activeTables}/12</div>
-                  </div>
-                </div>
-                
-                <div className="p-10 rounded-2xl bg-gradient-to-br from-pink-600/20 to-red-600/20 min-h-[200px]">
-                  <div className="flex flex-col gap-4">
-                    <div className="text-white" style={{ fontSize: '3.75rem' }}>Referrals</div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="text-gray-400" style={{ fontSize: '2.5rem' }}>Direct</div>
-                      <div className="text-white font-bold" style={{ fontSize: '3rem' }}>{userStats.directReferrals}</div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="text-gray-400" style={{ fontSize: '2.5rem' }}>Total Tree</div>
-                      <div className="text-white font-bold" style={{ fontSize: '3rem' }}>{userStats.totalReferrals}</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="p-10 rounded-2xl bg-gradient-to-br from-green-600/20 to-emerald-600/20 min-h-[200px]">
-                  <div className="flex items-center justify-between">
-                    <div className="text-white" style={{ fontSize: '3.75rem' }}>Total Cycles</div>
-                    <div className="text-white font-bold" style={{ fontSize: '6rem' }}>{userStats.totalCycles}</div>
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '1.2rem', color: 'white', marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                  <span>Total Cycles</span>
+                  <span>{totalCycles}</span>
                 </div>
               </div>
 
-              {/* Referral Tree */}
-              <div className="flex-1 overflow-y-auto" style={{ marginTop: '80px' }}>
-                <h3 className="font-bold text-white mb-10" style={{ fontSize: '6rem' }}>
-                  My Referral Tree
-                </h3>
-                
-                {/* Upline - only show if exists (not MASTER's referral) */}
-                {upline && (
-                  <div className="mb-16">
-                    <div className="mb-10" style={{ fontSize: '2.25rem', color: '#a78bfa' }}>
-                      ↑ Referred by
-                    </div>
-                    <div className="p-10 rounded-2xl bg-purple-600/20">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-bold text-white" style={{ fontSize: '3rem' }}>
-                            @{upline.nickname}
-                          </div>
-                          <div className="text-gray-400" style={{ fontSize: '2rem', marginTop: '8px' }}>
-                            {upline.activeTables} tables • {upline.referralsCount} referrals
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Your direct referrals */}
-                <div>
-                  <div className="mb-10" style={{ fontSize: '2.25rem', color: '#22d3ee' }}>
-                    ↓ My Direct Referrals ({userStats.directReferrals})
-                  </div>
-                  <div className="space-y-8">
-                    {referralsList.length > 0 ? (
-                      referralsList.map((ref) => (
-                        <div key={ref.id} className="p-10 rounded-2xl bg-cyan-600/10">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-bold text-white" style={{ fontSize: '3rem' }}>
-                                @{ref.nickname}
-                              </div>
-                              <div className="text-gray-400" style={{ fontSize: '2rem', marginTop: '8px' }}>
-                                {ref.activeTables} tables • {ref.referralsCount} referrals
-                              </div>
-                              <div className="text-green-400 font-bold" style={{ fontSize: '2.5rem', marginTop: '8px' }}>
-                                💰 {ref.totalEarnings || 0} TON
-                              </div>
-                            </div>
-                            <div className="text-green-400" style={{ fontSize: '2rem' }}>Active</div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="p-10 rounded-2xl bg-white/5 text-center">
-                        <div className="text-gray-400" style={{ fontSize: '2.5rem' }}>No direct referrals yet</div>
-                      </div>
-                    )}
-
-                    {userStats.directReferrals > 3 && (
-                      <div className="p-10 rounded-2xl bg-white/5 text-center">
-                        <div className="text-gray-400" style={{ fontSize: '2.5rem' }}>
-                          + {userStats.directReferrals - 3} more referrals
-                        </div>
-                        <button 
-                          onClick={() => window.location.href = '/referrals'}
-                          className="text-purple-400 hover:underline"
-                          style={{ fontSize: '2rem', marginTop: '8px' }}
-                        >
-                          View All →
-                        </button>
-                      </div>
-                    )}
-                  </div>
+              {/* Connect Wallet */}
+              <div className="flex flex-col mb-8">
+                <div style={{ fontSize: '1.2rem', color: 'white', marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
+                  Connect Wallet
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-start' }}>
+                  <TonConnectButton />
+                  {tonAddress && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', fontFamily: 'monospace' }}>
+                        {tonAddress.slice(0, 6)}...{tonAddress.slice(-4)}
+                      </span>
+                      <button
+                        onClick={() => tonConnectUI?.disconnect()}
+                        style={{
+                          padding: '8px 16px',
+                          fontSize: '0.9rem',
+                          background: 'rgba(239, 68, 68, 0.2)',
+                          border: '1px solid rgba(239, 68, 68, 0.5)',
+                          borderRadius: '0.5rem',
+                          color: '#f87171',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Disconnect
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Navigation */}
+              <div className="flex flex-col gap-4">
+                {[
+                  { label: 'Tables', href: '/tables' },
+                  { label: 'Referrals', href: '/referrals' },
+                ].map(item => (
+                  <a key={item.href} href={item.href}
+                    className="p-5 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
+                    style={{ fontSize: '1.2rem', color: 'white', textDecoration: 'none' }}
+                  >
+                    {item.label}
+                  </a>
+                ))}
               </div>
             </div>
           </div>
