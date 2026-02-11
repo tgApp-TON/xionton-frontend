@@ -46,6 +46,10 @@ export function RegisterClient() {
     }
   }, [isPremiumUser, premiumChecked]);
 
+  useEffect(() => {
+    console.log('tonAddress changed:', tonAddress);
+  }, [tonAddress]);
+
   const handleCheckChannel = async () => {
     if (!telegramId) return;
     setCheckingChannel(true);
@@ -132,6 +136,8 @@ export function RegisterClient() {
         }),
       });
       const data = await res.json();
+      console.log('Register response status:', res.status);
+      console.log('Register response data:', data);
       if (data.success && (data.userId != null || data.user?.id != null)) {
         localStorage.setItem('matrix_ton_user_id', (data.userId ?? data.user.id).toString());
         router.replace('/tables');
@@ -364,7 +370,24 @@ export function RegisterClient() {
               <TonConnectButton />
             </div>
             {registering && <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)' }}>Registering...</p>}
-            {tonAddress && !registering && <p style={{ textAlign: 'center', color: '#22c55e' }}>Connected. Completing registration...</p>}
+            {tonAddress && !registering && (
+              <button
+                onClick={() => handleRegister()}
+                style={{
+                  background: '#a855f7',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '0.75rem',
+                  padding: '12px 32px',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginTop: '1rem',
+                }}
+              >
+                Complete Registration
+              </button>
+            )}
           </div>
         )}
       </div>
