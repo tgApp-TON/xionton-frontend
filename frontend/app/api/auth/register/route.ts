@@ -47,19 +47,30 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       if (error.code === '23505') {
-        const { data: existingUser, error: lookupError } = await supabase
+        const { data: users, error: lookupError } = await supabase
           .from('User')
           .select('*')
-          .eq('telegramId', String(telegramId))
-          .maybeSingle();
+          .eq('telegramId', String(telegramId));
 
-        console.log('Lookup result:', JSON.stringify(existingUser), 'Lookup error:', JSON.stringify(lookupError));
+        console.log('All users with telegramId:', JSON.stringify(users), 'error:', JSON.stringify(lookupError));
 
-        if (existingUser) {
-          return NextResponse.json({ success: true, user: existingUser });
+        if (users && users.length > 0) {
+          return NextResponse.json({ success: true, user: users[0] });
         }
 
-        return NextResponse.json({ success: true, user: { id: 1, telegramId: String(telegramId) } });
+        // Try with numeric telegramId
+        const { data: users2 } = await supabase
+          .from('User')
+          .select('*')
+          .eq('telegramId', Number(telegramId));
+
+        console.log('Users with numeric telegramId:', JSON.stringify(users2));
+
+        if (users2 && users2.length > 0) {
+          return NextResponse.json({ success: true, user: users2[0] });
+        }
+
+        return NextResponse.json({ error: 'Could not find existing user' }, { status: 400 });
       }
       console.error('Registration error:', error);
       return NextResponse.json({ error: error.message }, { status: 400 });
