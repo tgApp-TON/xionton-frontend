@@ -72,8 +72,8 @@ export function RegisterClient() {
     setRegistering(true);
     setError(null);
 
-    let telegramId: string;
-    let telegramUsername: string | undefined;
+    let effectiveTelegramId: string = user?.id != null ? String(user.id) : String(Date.now());
+    let effectiveTelegramUsername: string | undefined = user?.username;
 
     if (webApp?.initData) {
       try {
@@ -84,32 +84,25 @@ export function RegisterClient() {
         });
         const initData = await initRes.json();
         if (initData.valid === true && initData.user) {
-          telegramId = String(initData.user.id);
-          telegramUsername = initData.user.username;
-        } else {
-          telegramId = String(Date.now());
-          telegramUsername = user?.username;
+          effectiveTelegramId = String(initData.user.id);
+          effectiveTelegramUsername = initData.user.username;
         }
       } catch {
-        telegramId = String(Date.now());
-        telegramUsername = user?.username;
+        // keep effectiveTelegramId / effectiveTelegramUsername from initial values
       }
-    } else {
-      telegramId = user?.id != null ? String(user.id) : String(Date.now());
-      telegramUsername = user?.username;
     }
 
     const nickname = `user_${Math.floor(Math.random() * 900000) + 100000}`;
     const walletToSend = tonAddress || '';
-    console.log('Sending to register:', { telegramId, telegramUsername, tonWallet: walletToSend });
+    console.log('Final register data:', { effectiveTelegramId, effectiveTelegramUsername });
 
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          telegramId,
-          telegramUsername: telegramUsername || undefined,
+          telegramId: effectiveTelegramId,
+          telegramUsername: effectiveTelegramUsername || undefined,
           isPremium: true,
           nickname,
           tonWallet: walletToSend,
@@ -128,7 +121,7 @@ export function RegisterClient() {
         res.status === 409 ||
         (data?.error && /duplicate key|unique constraint|duplicate/i.test(String(data.error)));
       if (isDuplicateWallet) {
-        const meRes = await fetch(`/api/auth/me?telegramId=${encodeURIComponent(telegramId)}`);
+        const meRes = await fetch(`/api/auth/me?telegramId=${encodeURIComponent(effectiveTelegramId)}`);
         const meData = await meRes.json();
         if (meData?.user?.id) {
           localStorage.setItem('matrix_ton_user_id', String(meData.user.id));
