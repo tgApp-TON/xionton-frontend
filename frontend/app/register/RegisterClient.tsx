@@ -32,7 +32,8 @@ export function RegisterClient() {
   console.log('REGISTER LOADED, telegramId:', telegramId, 'isReady:', isReady, 'user:', JSON.stringify(user));
 
   const telegramUsername = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.username ?? user?.username : user?.username;
-  const isPremiumUser = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.is_premium ?? isPremium : isPremium;
+  // TODO: re-enable premium check when initData is working
+  const isPremiumUser = true;
 
   useEffect(() => {
     console.log('Telegram WebApp:', typeof window !== 'undefined' ? window.Telegram?.WebApp : 'SSR');
@@ -72,18 +73,9 @@ export function RegisterClient() {
     console.log('tonAddress changed:', tonAddress);
   }, [tonAddress]);
 
-  const handleCheckChannel = async () => {
-    if (!telegramId) return;
-    setCheckingChannel(true);
-    try {
-      const res = await fetch(`/api/auth/check-channel?telegramId=${telegramId}`);
-      const data = await res.json();
-      setChannelSubscribed(data.subscribed);
-    } catch {
-      setChannelSubscribed(false);
-    } finally {
-      setCheckingChannel(false);
-    }
+  const handleCheckChannel = () => {
+    // TODO: re-enable channel check when bot is properly configured
+    setChannelSubscribed(true);
   };
 
   const checkNicknameAvailability = async () => {
