@@ -32,52 +32,64 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [referralCode, setReferralCode] = useState<string | null>(null);
 
   useEffect(() => {
-    const isInTelegram = typeof window !== 'undefined' && window.Telegram?.WebApp;
-    
-    if (isInTelegram && window.Telegram) {
-      const WebApp = window.Telegram.WebApp;
-      WebApp.ready();
-      WebApp.expand();
-      
-      const tgUser = WebApp.initDataUnsafe.user;
-      
-      if (tgUser) {
+    const tg = typeof window !== 'undefined' ? window.Telegram?.WebApp : null;
+    const initDataUnsafe = tg?.initDataUnsafe;
+    let userFromUnsafe = initDataUnsafe?.user;
+
+    console.log('TG WebApp version:', tg?.version);
+    console.log('TG platform:', tg?.platform);
+    console.log('initData:', tg?.initData);
+    console.log('user from initDataUnsafe:', userFromUnsafe);
+
+    // web.telegram.org (K) may not populate initDataUnsafe.user; try parsing initData string
+    if (!userFromUnsafe && tg?.initData) {
+      try {
+        const params = new URLSearchParams(tg.initData);
+        const userStr = params.get('user');
+        if (userStr) {
+          userFromUnsafe = JSON.parse(userStr) as TelegramUser;
+          console.log('user parsed from initData string:', userFromUnsafe);
+        }
+      } catch (e) {
+        console.warn('Failed to parse initData user:', e);
+      }
+    }
+
+    // telegramId for consumers = user?.id ?? null (no fallback id)
+    if (typeof window !== 'undefined' && tg) {
+      tg.ready();
+      tg.expand();
+      tg.setHeaderColor('#000000');
+      tg.setBackgroundColor('#000000');
+
+      if (userFromUnsafe) {
         setUser({
-          id: tgUser.id,
-          first_name: tgUser.first_name,
-          last_name: tgUser.last_name,
-          username: tgUser.username,
-          language_code: tgUser.language_code,
-          is_premium: tgUser.is_premium
+          id: userFromUnsafe.id,
+          first_name: userFromUnsafe.first_name,
+          last_name: userFromUnsafe.last_name,
+          username: userFromUnsafe.username,
+          language_code: userFromUnsafe.language_code,
+          is_premium: userFromUnsafe.is_premium
         });
+      } else {
+        setUser(null);
       }
 
-      const startParam = WebApp.initDataUnsafe?.start_param;
+      const startParam = initDataUnsafe?.start_param ?? new URLSearchParams(tg.initData || '').get('start_param');
       if (startParam) {
         setReferralCode(startParam);
         console.log('Referral code from URL:', startParam);
       }
-      
-      WebApp.setHeaderColor('#000000');
-      WebApp.setBackgroundColor('#000000');
     } else {
-      setUser({
-        id: 123456789,
-        first_name: 'Test',
-        last_name: 'User',
-        username: 'testuser',
-        language_code: 'en',
-        is_premium: true
-      });
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const refParam = urlParams.get('ref');
+      setUser(null);
+      const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+      const refParam = urlParams?.get('ref');
       if (refParam) {
         setReferralCode(refParam);
         console.log('Referral code from browser URL:', refParam);
       }
     }
-    
+
     setIsReady(true);
   }, []);
 
