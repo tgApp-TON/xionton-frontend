@@ -376,7 +376,7 @@ export function RegisterClient() {
             <input
               type="text"
               value={nickname}
-              onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20))}
+              onChange={(e) => setNickname(e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20))}
               placeholder="nickname"
               style={{
                 ...inputStyle,
