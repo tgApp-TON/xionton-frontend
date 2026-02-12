@@ -150,30 +150,29 @@ export function StatsScreen({ isOpen, onClose }: StatsScreenProps) {
             {(userNickname || userWallet) && (
               <div
                 style={{
-                  background: 'rgba(168, 85, 247, 0.1)',
-                  border: '1px solid rgba(168, 85, 247, 0.3)',
+                  background: 'rgba(168,85,247,0.1)',
+                  border: '1px solid rgba(168,85,247,0.3)',
                   borderRadius: '16px',
                   padding: '20px',
-                  marginBottom: '8px',
+                  marginBottom: '16px',
                 }}
               >
+                <h3 style={{ color: '#ffffff', fontWeight: 700, fontSize: '1.1rem', margin: '0 0 16px 0' }}>Your Account</h3>
                 {userNickname && (
                   <div style={{ marginBottom: '12px' }}>
                     <p style={{ color: '#aaaaaa', fontSize: '0.9rem', margin: '0 0 4px 0' }}>Nickname</p>
-                    <p style={{ color: '#ffffff', fontWeight: 700, fontSize: '1.1rem', margin: 0 }}>{userNickname}</p>
+                    <p style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', margin: 0 }}>{userNickname}</p>
                   </div>
                 )}
                 {userWallet && (
-                  <div>
+                  <div style={{ marginBottom: '12px' }}>
                     <p style={{ color: '#aaaaaa', fontSize: '0.9rem', margin: '0 0 4px 0' }}>Wallet</p>
-                    <p style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem', margin: 0 }}>
+                    <p style={{ color: '#aaaaaa', fontSize: '0.9rem', margin: 0 }}>
                       {userWallet.slice(0, 6)}...{userWallet.slice(-4)}
                     </p>
                   </div>
                 )}
-                <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '12px 0 0 0' }}>
-                  Your unique identifier in Matrix TON
-                </p>
+                <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '12px 0 0 0' }}>One nickname = one wallet</p>
               </div>
             )}
             <div className="relative overflow-hidden rounded-3xl p-6 border-2"
