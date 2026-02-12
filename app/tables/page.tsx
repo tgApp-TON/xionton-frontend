@@ -11,24 +11,32 @@ export default function TablesPage() {
   const [userTables, setUserTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [userId, setUserId] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('matrix_ton_user_id');
-    }
-    return null;
-  });
+  const [userId, setUserId] = useState<string | null>(null);
 
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedId = localStorage.getItem('matrix_ton_user_id');
-      if (!storedId) {
-        router.replace('/register');
-      } else {
-        setUserId(storedId);
-      }
+    if (typeof window === 'undefined') return;
+    const storedId = localStorage.getItem('matrix_ton_user_id');
+    if (!storedId) {
+      router.replace('/register');
+      return;
     }
+    let cancelled = false;
+    (async () => {
+      const verifyRes = await fetch(`/api/auth/me?userId=${encodeURIComponent(storedId)}`);
+      const verifyData = await verifyRes.json();
+      if (cancelled) return;
+      if (!verifyData.exists) {
+        localStorage.removeItem('matrix_ton_user_id');
+        router.replace('/register');
+        return;
+      }
+      setUserId(storedId);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   useEffect(() => {
