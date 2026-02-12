@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}";
+self.__REACT_LOADABLE_MANIFEST='{"app/register/page.tsx -> ./RegisterClient":{"id":9558,"files":["static/chunks/6809c4f0-cf84d1fd1daa74a5.js","static/chunks/9e84c5da-4e4ce5964f9c953f.js","static/chunks/634-e6de15378fa53f97.js","static/chunks/930.f0fe46eb24c81f4c.js","static/chunks/394.f73c3cfdc09c805e.js"]}}';

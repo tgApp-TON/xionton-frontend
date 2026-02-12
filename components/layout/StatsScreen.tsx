@@ -11,9 +11,27 @@ interface StatsScreenProps {
 export function StatsScreen({ isOpen, onClose }: StatsScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showTree, setShowTree] = useState(false);
+  const [userNickname, setUserNickname] = useState<string | null>(null);
+  const [userWallet, setUserWallet] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
+    const fetchUserData = async () => {
+      if (typeof window === 'undefined') return;
+      const userId = localStorage.getItem('matrix_ton_user_id');
+      if (!userId) return;
+      try {
+        const res = await fetch(`/api/auth/me?userId=${encodeURIComponent(userId)}`);
+        const data = await res.json();
+        if (data.exists && data.user) {
+          setUserNickname(data.user.nickname || null);
+          setUserWallet(data.user.tonWallet || null);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+    fetchUserData();
     
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -129,6 +147,35 @@ export function StatsScreen({ isOpen, onClose }: StatsScreenProps) {
           </div>
 
           <div className="p-6 space-y-6">
+            {(userNickname || userWallet) && (
+              <div
+                style={{
+                  background: 'rgba(168, 85, 247, 0.1)',
+                  border: '1px solid rgba(168, 85, 247, 0.3)',
+                  borderRadius: '16px',
+                  padding: '20px',
+                  marginBottom: '8px',
+                }}
+              >
+                {userNickname && (
+                  <div style={{ marginBottom: '12px' }}>
+                    <p style={{ color: '#aaaaaa', fontSize: '0.9rem', margin: '0 0 4px 0' }}>Nickname</p>
+                    <p style={{ color: '#ffffff', fontWeight: 700, fontSize: '1.1rem', margin: 0 }}>{userNickname}</p>
+                  </div>
+                )}
+                {userWallet && (
+                  <div>
+                    <p style={{ color: '#aaaaaa', fontSize: '0.9rem', margin: '0 0 4px 0' }}>Wallet</p>
+                    <p style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem', margin: 0 }}>
+                      {userWallet.slice(0, 6)}...{userWallet.slice(-4)}
+                    </p>
+                  </div>
+                )}
+                <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '12px 0 0 0' }}>
+                  Your unique identifier in Matrix TON
+                </p>
+              </div>
+            )}
             <div className="relative overflow-hidden rounded-3xl p-6 border-2"
                  style={{
                    background: 'linear-gradient(135deg, rgba(80, 80, 80, 0.3), rgba(40, 40, 40, 0.3))',

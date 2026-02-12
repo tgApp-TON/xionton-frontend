@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     if (Number.isNaN(userId)) return NextResponse.json({ exists: false });
     const { data } = await supabase
       .from('User')
-      .select('id, nickname, role')
+      .select('id, nickname, role, tonWallet')
       .eq('id', userId)
       .single();
     if (data) return NextResponse.json({ exists: true, user: data });

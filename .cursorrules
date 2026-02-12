@@ -1,0 +1,6 @@
+After every code change, always run these git commands:
+1. git add -A
+2. git commit -m "description of changes"
+3. Never skip git commit after making changes to source files
+
+This ensures all changes are tracked in git.
