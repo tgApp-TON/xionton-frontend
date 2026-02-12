@@ -71,12 +71,12 @@ export function RegisterClient() {
   };
 
   const checkNicknameAvailability = async () => {
-    if (!nickname || nickname.length < 3 || nickname.length > 20 || !/^[a-zA-Z0-9_]+$/.test(nickname)) {
+    if (!nickname || !/^[a-zA-Z0-9_]{3,20}$/.test(nickname)) {
       setNicknameError('3-20 characters, letters, numbers, underscore only');
       setNicknameAvailable(false);
       return;
     }
-    if (nickname.toLowerCase() === 'master') {
+    if (nickname === 'master') {
       setNicknameError('This nickname is reserved');
       setNicknameAvailable(false);
       return;
@@ -105,7 +105,7 @@ export function RegisterClient() {
       return;
     }
     const t = setTimeout(() => {
-      if (nickname.length >= 3 && nickname.length <= 20 && /^[a-zA-Z0-9_]+$/.test(nickname) && nickname.toLowerCase() !== 'master') {
+      if (/^[a-zA-Z0-9_]{3,20}$/.test(nickname) && nickname !== 'master') {
         checkNicknameAvailability();
       } else {
         setNicknameAvailable(null);
