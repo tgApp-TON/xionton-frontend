@@ -10,7 +10,12 @@ const manifestUrl =
 
 export function TonConnectProvider({ children }: { children: ReactNode }) {
   return (
-    <TonConnectUIProvider manifestUrl={manifestUrl}>
+    <TonConnectUIProvider
+      manifestUrl={manifestUrl}
+      actionsConfiguration={{
+        twaReturnUrl: 'https://t.me/MatrixTON_Bot',
+      }}
+    >
       {children}
     </TonConnectUIProvider>
   );

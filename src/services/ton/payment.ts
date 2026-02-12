@@ -99,15 +99,32 @@ export async function activateTable(
   });
   
   console.log(`📊 Статистика обновлена`);
-  
-  // SPILLOVER: Размещаем пользователя в столе ВВЕРХ
+
+  // TABLE 1 SPECIAL RULES
+  if (tableNumber === 1) {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { referrerId: true },
+    });
+    const referrerId = user?.referrerId ?? null;
+    if (referrerId === 1) {
+      // MASTER (id=1): 100% already to INCOME_WALLET, partner NOT visible, no placement
+      console.log(`👑 Table 1: referrer is MASTER — partner not placed in any table`);
+      return table;
+    }
+    // Regular referrer: 10% INCOME (already), 90% (9 TON) to slots — place partner in referrer's Table 1
+    console.log(`🔄 Table 1: placing partner in referrer's Table 1 (9 TON to slots)`);
+    await placePartnerInTable(userId, 1, 9);
+    return table;
+  }
+
+  // TABLES 2+: spillover — place partner upline
   const price = TABLE_PRICES[tableNumber as keyof typeof TABLE_PRICES];
-  const afterFee = tableNumber === 1 ? 0 : price * (1 - PLATFORM_FEE);
-  
+  const afterFee = price * (1 - PLATFORM_FEE);
   if (afterFee > 0) {
     console.log(`🔄 Запуск spillover для User ${userId}, Table ${tableNumber}`);
     await placePartnerInTable(userId, tableNumber, afterFee);
   }
-  
+
   return table;
 }

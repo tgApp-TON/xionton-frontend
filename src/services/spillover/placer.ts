@@ -5,6 +5,14 @@ import { notifySpillover, notifyTableClosed } from '../notification/telegram';
 
 const prisma = new PrismaClient();
 
+/**
+ * SPILLOVER RULES:
+ * - Slots 1/2/3: partner STOPS here; slot 1 → payout to owner, 2–3 → held for autopurchase; spillover ENDS.
+ * - Slot 4 (non-MASTER): money → OPERATIONS_WALLET (reactivation), owner gets 0; table CLOSES & REACTIVATES; partner from slot 4 continues spillover UP.
+ * - Slot 4 (MASTER): money → MASTER wallet; table reactivates; spillover STOPS (end of chain).
+ * Referral bond is PERMANENT (never changed during spillover).
+ */
+
 // Разместить партнёра в столе
 export async function placePartnerInTable(
   partnerUserId: number,
@@ -131,8 +139,46 @@ async function processPosition(
   }
   
   if (position === 4) {
-    // СЛОТ 4: Реактивация
-    console.log(`🔄 Слот 4: ${amount} TON для реактивации`);
+    // SLOT 4 RULE: non-MASTER → money to OPERATIONS (reactivation), owner gets 0. MASTER → money to MASTER wallet, spillover STOPS.
+    if (ownerId === 1) {
+      // MASTER slot 4 exception: money → MASTER wallet, table reactivates, spillover STOPS (handled in handleMasterTableReset — no recursion)
+      console.log(`👑 Слот 4 MASTER: ${amount} TON → MASTER wallet`);
+      await prisma.pendingPayout.create({
+        data: {
+          userId: 1,
+          amount: amount,
+          reason: 'slot_4_master',
+          tableNumber: tableNumber,
+          status: 'pending',
+          payoutMethod: 'BATCH',
+        },
+      });
+      await prisma.userStats.update({
+        where: { userId: 1 },
+        data: { totalEarned: { increment: amount } },
+      });
+      const pos = await prisma.tablePosition.findFirst({
+        where: { tableId, position: 4, partnerUserId: partnerId },
+      });
+      if (pos) {
+        await prisma.tablePosition.update({
+          where: { id: pos.id },
+          data: { status: 'PAID_OUT' },
+        });
+      }
+    } else {
+      // Non-MASTER: money → OPERATIONS_WALLET (for reactivation), table owner gets 0 TON
+      console.log(`🔄 Слот 4: ${amount} TON → OPERATIONS (реактивация), владелец 0 TON`);
+      const pos = await prisma.tablePosition.findFirst({
+        where: { tableId, position: 4, partnerUserId: partnerId },
+      });
+      if (pos) {
+        await prisma.tablePosition.update({
+          where: { id: pos.id },
+          data: { status: 'PLATFORM_INCOME' },
+        });
+      }
+    }
   }
 }
 

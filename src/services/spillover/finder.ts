@@ -2,6 +2,11 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+/**
+ * REFERRAL BONDS: Permanent. Established at registration via referral link.
+ * Does NOT change during spillover — partner remains the referrer of the original inviter.
+ */
+
 // Найти активный стол ВВЕРХ по структуре
 export async function findActiveTableUpline(
   userId: number,

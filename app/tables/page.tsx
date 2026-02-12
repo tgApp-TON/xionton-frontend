@@ -1,22 +1,35 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { CanvasTableCard } from '@/components/tables/CanvasTableCard';
 import { ScrollButtons } from '@/components/ScrollButtons';
 import { TABLE_PRICES } from '@/lib/types';
 
 export default function TablesPage() {
+  const router = useRouter();
   const [userTables, setUserTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
-  const [userId] = useState<string>(() => {
+  const [userId, setUserId] = useState<string | null>(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('matrix_ton_user_id') || '1';
+      return localStorage.getItem('matrix_ton_user_id');
     }
-    return '1';
+    return null;
   });
 
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedId = localStorage.getItem('matrix_ton_user_id');
+      if (!storedId) {
+        router.replace('/register');
+      } else {
+        setUserId(storedId);
+      }
+    }
+  }, [router]);
 
   useEffect(() => {
     if (loading) {
@@ -44,6 +57,7 @@ export default function TablesPage() {
   }, [loading]);
 
   useEffect(() => {
+    if (!userId) return;
     const fetchTables = async () => {
       try {
         const response = await fetch(`/api/user/tables?userId=${userId}`);
@@ -61,7 +75,37 @@ export default function TablesPage() {
     fetchTables();
   }, [userId]);
 
-  const activeTables = userTables.filter(t => t.status === 'ACTIVE');
+  // Always show tables 1–12
+  const allTableNumbers = Array.from({ length: 12 }, (_, i) => i + 1);
+
+  const refreshTables = async () => {
+    if (!userId) return;
+    try {
+      const response = await fetch(`/api/user/tables?userId=${userId}`);
+      const data = await response.json();
+      if (data.success) setUserTables(data.tables);
+    } catch (error) {
+      console.error('Failed to fetch tables:', error);
+    }
+  };
+
+  const handleBuy = async (tableNumber: number) => {
+    if (!userId) return;
+    try {
+      const response = await fetch('/api/user/tables/buy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: parseInt(userId, 10),
+          tableNumber,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) await refreshTables();
+    } catch (error) {
+      console.error('Failed to buy table:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen relative">
@@ -102,66 +146,38 @@ export default function TablesPage() {
                 />
               </div>
             </div>
-          ) : userTables.length > 0 ? (
-            userTables.map((table, index) => {
-              const isActive = table.status === 'ACTIVE';
-              const price = TABLE_PRICES[table.tableNumber];
-              const positions = table.positions || [];
+          ) : (
+            allTableNumbers.map((tableNumber) => {
+              const userTable = userTables.find((t: any) => t.tableNumber === tableNumber);
+              const isActive = !!userTable && userTable.status === 'ACTIVE';
+              const price = TABLE_PRICES[tableNumber] ?? 0;
+              const positions = userTable?.positions ?? [];
+              // Only pass nickname for display (never telegramUsername/telegramId)
+              const toSlot = (p: any) => p ? { nickname: p.partnerNickname ?? p.nickname, filled: true } : null;
               const slots: [(any | null)?, (any | null)?, (any | null)?, (any | null)?] = [
-                positions.find((p: any) => p.position === 1) || null,
-                positions.find((p: any) => p.position === 2) || null,
-                positions.find((p: any) => p.position === 3) || null,
-                positions.find((p: any) => p.position === 4) || null,
+                toSlot(positions.find((p: any) => p.position === 1) ?? null),
+                toSlot(positions.find((p: any) => p.position === 2) ?? null),
+                toSlot(positions.find((p: any) => p.position === 3) ?? null),
+                toSlot(positions.find((p: any) => p.position === 4) ?? null),
               ];
-
-              // Check if previous table is active (or it's table 1)
-              const previousTable = userTables.find(t => t.tableNumber === table.tableNumber - 1);
-              const isUnlocked = table.tableNumber === 1 || previousTable?.status === 'ACTIVE';
-
-              const handleBuy = async () => {
-                try {
-                  const response = await fetch('/api/user/tables/buy', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                      userId: parseInt(userId),
-                      tableNumber: table.tableNumber,
-                    }),
-                  });
-                  const data = await response.json();
-                  if (data.success) {
-                    // Refresh tables
-                    const refreshResponse = await fetch(`/api/user/tables?userId=${userId}`);
-                    const refreshData = await refreshResponse.json();
-                    if (refreshData.success) {
-                      setUserTables(refreshData.tables);
-                    }
-                  }
-                } catch (error) {
-                  console.error('Failed to buy table:', error);
-                }
-              };
+              const cycles = userTable ? (userTable.cycleNumber ?? 1) - 1 : 0;
+              const prevTableActive = userTables.some((t: any) => t.tableNumber === tableNumber - 1 && t.status === 'ACTIVE');
+              const isUnlocked = tableNumber === 1 || prevTableActive;
 
               return (
-                <div key={table.id} style={{ width: '44vw' }}>
+                <div key={tableNumber} style={{ width: '44vw' }}>
                   <CanvasTableCard
-                    tableNumber={table.tableNumber}
+                    tableNumber={tableNumber}
                     price={price}
-                    cycles={table.cycleNumber - 1}
+                    cycles={cycles}
                     slots={slots}
                     isActive={isActive}
                     isUnlocked={isUnlocked}
-                    onBuy={handleBuy}
+                    onBuy={() => handleBuy(tableNumber)}
                   />
                 </div>
               );
             })
-          ) : (
-            <div className="col-span-2 text-center text-white text-xl py-12">
-              No tables found
-            </div>
           )}
         </div>
       </div>

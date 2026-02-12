@@ -82,7 +82,7 @@ export interface PendingPayout {
   createdAt: string;
 }
 
-// Referral types
+// Referral types — in UI only show nickname; never display telegramUsername or telegramId
 export interface Referral {
   id: number;
   nickname: string;

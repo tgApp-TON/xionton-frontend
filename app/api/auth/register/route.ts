@@ -6,13 +6,38 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { telegramId, telegramUsername, isPremium, nickname, tonWallet, referralCode } = body;
 
-    if (!telegramId || !nickname || !tonWallet) {
+    if (!telegramId || !nickname) {
       return NextResponse.json(
-        { error: 'telegramId, nickname, and tonWallet are required' },
+        { error: 'telegramId and nickname are required' },
         { status: 400 }
       );
     }
 
+    // Check if user already exists by telegramId
+    const { data: existingUsers } = await supabase
+      .from('User')
+      .select('*')
+      .eq('telegramId', String(telegramId));
+
+    if (existingUsers && existingUsers.length > 0) {
+      const existing = existingUsers[0];
+      // Update telegramUsername on every login if it changed
+      if (telegramUsername != null && String(telegramUsername) !== (existing.telegramUsername ?? '')) {
+        await supabase
+          .from('User')
+          .update({ telegramUsername: telegramUsername || null })
+          .eq('id', existing.id);
+        const { data: updated } = await supabase
+          .from('User')
+          .select('*')
+          .eq('id', existing.id)
+          .single();
+        return NextResponse.json({ success: true, user: updated ?? existing });
+      }
+      return NextResponse.json({ success: true, user: existing });
+    }
+
+    // referrerId defaults to 1 (MASTER)
     let referrerId = 1;
     if (referralCode && referralCode !== 'MASTER') {
       const { data: referrer } = await supabase
@@ -38,7 +63,7 @@ export async function POST(request: NextRequest) {
         referralCode: referralCodeValue,
         isPremium: Boolean(isPremium),
         accountCreatedDate: new Date().toISOString(),
-        tonWallet: String(tonWallet),
+        tonWallet: tonWallet != null && String(tonWallet).trim() !== '' ? String(tonWallet).trim() : '',
         role: 'USER',
         isVerified: true,
       })
@@ -46,12 +71,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      if (error.code === '23505') {
-        return NextResponse.json(
-          { error: 'User with this telegram ID or nickname already exists' },
-          { status: 400 }
-        );
-      }
       console.error('Registration error:', error);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }

@@ -29,8 +29,16 @@ export function RegisterClient() {
   const [registering, setRegistering] = useState(false);
 
   const telegramId = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.id ?? user?.id : user?.id;
+
   const telegramUsername = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.username ?? user?.username : user?.username;
   const isPremiumUser = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.is_premium ?? isPremium : isPremium;
+
+  useEffect(() => {
+    console.log('Telegram WebApp:', typeof window !== 'undefined' ? window.Telegram?.WebApp : 'SSR');
+    console.log('initDataUnsafe:', typeof window !== 'undefined' ? window.Telegram?.WebApp?.initDataUnsafe : undefined);
+    console.log('user from useTelegram:', user);
+    console.log('telegramId resolved:', telegramId);
+  }, []);
 
   useEffect(() => {
     WebApp?.ready?.();
@@ -38,30 +46,30 @@ export function RegisterClient() {
   }, []);
 
   useEffect(() => {
-    const checkRegistered = async () => {
-      if (!telegramId) return;
-      try {
-        const res = await fetch(`/api/auth/check?telegramId=${telegramId}`);
-        const data = await res.json();
-        if (data.registered) {
+    if (!telegramId) return;
+    fetch(`/api/auth/me?telegramId=${telegramId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.exists) {
+          if (data.user?.id) {
+            localStorage.setItem('matrix_ton_user_id', String(data.user.id));
+          }
           router.replace('/tables');
         }
-      } catch {
-        // ignore
-      }
-    };
-    checkRegistered();
+      })
+      .catch(() => {});
   }, [telegramId, router]);
 
   useEffect(() => {
-    if (telegramId && premiumChecked === null) {
+    if (premiumChecked === null) {
       const premium = Boolean(isPremiumUser);
       setPremiumChecked(premium);
-      if (premium) {
-        setTimeout(() => setStep(2), 800);
-      }
     }
-  }, [telegramId, isPremiumUser, premiumChecked]);
+  }, [isPremiumUser, premiumChecked]);
+
+  useEffect(() => {
+    console.log('tonAddress changed:', tonAddress);
+  }, [tonAddress]);
 
   const handleCheckChannel = async () => {
     if (!telegramId) return;
@@ -70,9 +78,6 @@ export function RegisterClient() {
       const res = await fetch(`/api/auth/check-channel?telegramId=${telegramId}`);
       const data = await res.json();
       setChannelSubscribed(data.subscribed);
-      if (data.subscribed) {
-        setTimeout(() => setStep(3), 600);
-      }
     } catch {
       setChannelSubscribed(false);
     } finally {
@@ -80,17 +85,13 @@ export function RegisterClient() {
     }
   };
 
-  const handleOpenChannel = () => {
-    WebApp?.openTelegramLink?.('https://t.me/MatrixTON_Official');
-  };
-
   const checkNicknameAvailability = async () => {
-    if (!nickname || nickname.length < 3 || nickname.length > 20 || !/^[a-zA-Z0-9_]+$/.test(nickname)) {
+    if (!nickname || !/^[a-zA-Z0-9_]{3,20}$/.test(nickname)) {
       setNicknameError('3-20 characters, letters, numbers, underscore only');
       setNicknameAvailable(false);
       return;
     }
-    if (nickname.toLowerCase() === 'master') {
+    if (nickname === 'master') {
       setNicknameError('This nickname is reserved');
       setNicknameAvailable(false);
       return;
@@ -119,7 +120,7 @@ export function RegisterClient() {
       return;
     }
     const t = setTimeout(() => {
-      if (nickname.length >= 3 && nickname.length <= 20 && /^[a-zA-Z0-9_]+$/.test(nickname) && nickname.toLowerCase() !== 'master') {
+      if (/^[a-zA-Z0-9_]{3,20}$/.test(nickname) && nickname !== 'master') {
         checkNicknameAvailability();
       } else {
         setNicknameAvailable(null);
@@ -139,8 +140,13 @@ export function RegisterClient() {
     }
   };
 
-  const handleRegister = async () => {
-    if (!telegramId || !nickname || !tonAddress) return;
+  const handleRegister = async (walletOverride?: string) => {
+    const walletToSend = walletOverride !== undefined ? walletOverride : (tonAddress ?? '');
+    console.log('handleRegister called with:', { telegramId, nickname, tonAddress, nicknameAvailable, walletToSend });
+    if (!telegramId || !nickname) {
+      setNicknameError('Missing required fields');
+      return;
+    }
     setRegistering(true);
     try {
       const res = await fetch('/api/auth/register', {
@@ -151,13 +157,15 @@ export function RegisterClient() {
           telegramUsername: telegramUsername || undefined,
           isPremium: isPremiumUser,
           nickname,
-          tonWallet: tonAddress,
+          tonWallet: walletToSend,
           referralCode: referralCode || 'MASTER',
         }),
       });
       const data = await res.json();
-      if (data.success && data.user) {
-        localStorage.setItem('matrix_ton_user_id', String(data.user.id));
+      console.log('Register response status:', res.status);
+      console.log('Register response data:', JSON.stringify(data));
+      if (data.success && (data.userId != null || data.user?.id != null)) {
+        localStorage.setItem('matrix_ton_user_id', (data.userId ?? data.user.id).toString());
         router.replace('/tables');
       } else {
         setNicknameError(data.error || 'Registration failed');
@@ -169,6 +177,7 @@ export function RegisterClient() {
     }
   };
 
+  // Step 4: if wallet is already connected, skip connect UI and register with existing tonAddress
   useEffect(() => {
     if (step === 4 && tonAddress && nickname && nicknameAvailable && !registering) {
       handleRegister();
@@ -212,6 +221,43 @@ export function RegisterClient() {
     fontWeight: 600,
     cursor: 'pointer',
   };
+
+  const continueButtonStyle: React.CSSProperties = {
+    background: '#a855f7',
+    color: '#ffffff',
+    border: 'none',
+    borderRadius: '0.75rem',
+    padding: '12px 32px',
+    fontSize: '1rem',
+    fontWeight: 600,
+    cursor: 'pointer',
+    marginTop: '1rem',
+  };
+
+  if (!telegramId) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center" style={{ padding: '2rem' }}>
+        <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.125rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+          Please open this app through Telegram bot @MatrixTON_Bot
+        </p>
+        <a
+          href="https://t.me/MatrixTON_Bot"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            padding: '1rem 1.5rem',
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
+            borderRadius: '0.75rem',
+            color: '#fff',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}
+        >
+          t.me/MatrixTON_Bot
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative" style={{ paddingTop: '70px' }}>
@@ -285,6 +331,11 @@ export function RegisterClient() {
                 </div>
               </div>
             )}
+            {premiumChecked !== null && (
+              <button onClick={() => setStep(2)} style={continueButtonStyle}>
+                Continue →
+              </button>
+            )}
           </div>
         )}
 
@@ -311,17 +362,19 @@ export function RegisterClient() {
               >
                 {channelSubscribed ? <Check size={24} style={{ color: '#22c55e' }} /> : <X size={24} style={{ color: '#ef4444' }} />}
                 <p style={{ margin: 0, color: '#fff', fontWeight: 600 }}>
-                  {channelSubscribed ? 'Subscribed' : 'Not subscribed yet'}
+                  {channelSubscribed ? 'Subscribed ✓' : 'Not subscribed yet'}
                 </p>
               </div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <button onClick={handleOpenChannel} style={{ ...buttonStyle, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(139, 92, 246, 0.5)' }}>
-                Open @MatrixTON_Official
-              </button>
               <button onClick={handleCheckChannel} disabled={checkingChannel} style={buttonStyle}>
                 {checkingChannel ? 'Checking...' : 'Check'}
               </button>
+              {channelSubscribed === true && (
+                <button onClick={() => setStep(3)} style={continueButtonStyle}>
+                  Continue →
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -338,8 +391,10 @@ export function RegisterClient() {
             <input
               type="text"
               value={nickname}
-              onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20))}
+              onChange={(e) => setNickname(e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20))}
               placeholder="nickname"
+              autoCapitalize="none"
+              autoCorrect="off"
               style={{
                 ...inputStyle,
                 marginBottom: '0.5rem',
@@ -369,7 +424,41 @@ export function RegisterClient() {
               <TonConnectButton />
             </div>
             {registering && <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)' }}>Registering...</p>}
-            {tonAddress && !registering && <p style={{ textAlign: 'center', color: '#22c55e' }}>Connected. Completing registration...</p>}
+            {tonAddress && !registering && (
+              <button
+                onClick={() => handleRegister()}
+                style={{
+                  background: '#a855f7',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '0.75rem',
+                  padding: '12px 32px',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  marginTop: '1rem',
+                }}
+              >
+                Complete Registration
+              </button>
+            )}
+            {!registering && (
+              <button
+                onClick={() => handleRegister('')}
+                style={{
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.7)',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  borderRadius: '0.75rem',
+                  padding: '12px 32px',
+                  fontSize: '1rem',
+                  cursor: 'pointer',
+                  marginTop: '0.75rem',
+                }}
+              >
+                Skip for now →
+              </button>
+            )}
           </div>
         )}
       </div>
