@@ -75,6 +75,18 @@ export function RegisterClient() {
     let effectiveTelegramId: string = user?.id != null ? String(user.id) : String(Date.now());
     let effectiveTelegramUsername: string | undefined = user?.username;
 
+    const tgWebApp = typeof window !== 'undefined' ? (window as any)?.Telegram?.WebApp : null;
+    const tgUser = tgWebApp?.initDataUnsafe?.user;
+
+    console.log('WebApp direct user:', tgUser);
+
+    if (tgUser) {
+      if (tgUser.id) effectiveTelegramId = String(tgUser.id);
+      if (tgUser.username) effectiveTelegramUsername = tgUser.username;
+    }
+
+    console.log('After WebApp direct:', { effectiveTelegramId, effectiveTelegramUsername });
+
     if (webApp?.initData) {
       try {
         const initRes = await fetch('/api/auth/telegram-init', {
