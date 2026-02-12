@@ -250,7 +250,7 @@ export function RegisterClient() {
           Please open this app in Telegram mobile app
         </p>
         <a
-          href="https://t.me/MatrixTON_Bot"
+          href="https://t.me/MatrixTONTON_Bot"
           target="_blank"
           rel="noopener noreferrer"
           style={{
