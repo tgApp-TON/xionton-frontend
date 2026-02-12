@@ -13,11 +13,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Convert telegramId to a valid bigint-compatible value
+    // If it starts with "wallet_" or contains non-numeric chars, generate a numeric hash
+    let numericTelegramId: string;
+    if (/^\d+$/.test(String(telegramId))) {
+      numericTelegramId = String(telegramId);
+    } else {
+      // Create a numeric hash from the string (use char codes)
+      const str = String(telegramId);
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash = hash & hash;
+      }
+      numericTelegramId = String(Math.abs(hash) + 9000000000);
+    }
+
     // Check if user already exists by telegramId
     const { data: existingUsers } = await supabase
       .from('User')
       .select('*')
-      .eq('telegramId', String(telegramId));
+      .eq('telegramId', numericTelegramId);
 
     if (existingUsers && existingUsers.length > 0) {
       const existing = existingUsers[0];
@@ -56,7 +72,7 @@ export async function POST(request: NextRequest) {
     const { data: user, error } = await supabase
       .from('User')
       .insert({
-        telegramId: String(telegramId),
+        telegramId: numericTelegramId,
         telegramUsername: telegramUsername || null,
         nickname,
         referrerId,

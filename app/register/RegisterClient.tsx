@@ -64,8 +64,7 @@ export function RegisterClient() {
     setError(null);
 
     const telegramIdRaw = user?.id;
-    const walletPrefix = (tonAddress || 'noaddr').slice(0, 10);
-    const telegramId = telegramIdRaw != null ? String(telegramIdRaw) : `wallet_${walletPrefix}`;
+    const telegramId = telegramIdRaw != null ? String(telegramIdRaw) : String(Date.now());
     const telegramUsername = user?.username;
     const nickname = `user_${Math.floor(Math.random() * 900000) + 100000}`;
 
