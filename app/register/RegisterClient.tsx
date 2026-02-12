@@ -100,6 +100,8 @@ export function RegisterClient() {
     }
 
     const nickname = `user_${Math.floor(Math.random() * 900000) + 100000}`;
+    const walletToSend = tonAddress || '';
+    console.log('Sending to register:', { telegramId, telegramUsername, tonWallet: walletToSend });
 
     try {
       const res = await fetch('/api/auth/register', {
@@ -110,7 +112,7 @@ export function RegisterClient() {
           telegramUsername: telegramUsername || undefined,
           isPremium: true,
           nickname,
-          tonWallet: tonAddress || '',
+          tonWallet: walletToSend,
           referralCode: 'MASTER',
         }),
       });

@@ -5,6 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { telegramId, telegramUsername, isPremium, nickname, tonWallet, referralCode } = body;
+    console.log('Register API received:', { telegramId, telegramUsername, isPremium, nickname, tonWallet: tonWallet ? 'present' : 'empty', referralCode });
 
     if (!telegramId || !nickname) {
       return NextResponse.json(
