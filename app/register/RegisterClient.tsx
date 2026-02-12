@@ -54,6 +54,7 @@ export function RegisterClient() {
   const [registering, setRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [registerAttempt, setRegisterAttempt] = useState(0);
+  const [nickname] = useState(() => 'user_' + Math.floor(100000 + Math.random() * 900000));
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -104,7 +105,6 @@ export function RegisterClient() {
       }
     }
 
-    const nickname = `user_${Math.floor(Math.random() * 900000) + 100000}`;
     const walletToSend = tonAddress || '';
     console.log('Final register data:', { effectiveTelegramId, effectiveTelegramUsername });
 
@@ -316,6 +316,24 @@ export function RegisterClient() {
           <div style={{ textAlign: 'center', marginBottom: '18px' }}>
             <h2 style={{ color: '#ffffff', fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Connect Wallet</h2>
             <p style={{ color: '#cccccc', margin: '10px 0 0 0' }}>TON wallet required to participate</p>
+          </div>
+
+          <div
+            style={{
+              background: 'rgba(168, 85, 247, 0.1)',
+              border: '1px solid rgba(168, 85, 247, 0.3)',
+              borderRadius: '12px',
+              padding: '16px',
+              marginBottom: '20px',
+              textAlign: 'center',
+            }}
+          >
+            <p style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', margin: '0 0 8px 0' }}>
+              Your nickname: <span style={{ color: '#a855f7' }}>{nickname}</span>
+            </p>
+            <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: 0 }}>
+              You are verified by your unique nickname + wallet. One nickname = one wallet.
+            </p>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center' }}>
