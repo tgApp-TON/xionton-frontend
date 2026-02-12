@@ -34,6 +34,8 @@ export function RegisterClient() {
   const telegramUsername = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.username ?? user?.username : user?.username;
   // TODO: re-enable premium check when initData is working
   const isPremiumUser = true;
+  // Account age: lower Telegram user IDs = older; IDs < 1000000000 are generally 30+ days. Cannot check reliably from frontend.
+  const isAccountOldEnough = true;
 
   useEffect(() => {
     console.log('Telegram WebApp:', typeof window !== 'undefined' ? window.Telegram?.WebApp : 'SSR');
@@ -64,10 +66,10 @@ export function RegisterClient() {
 
   useEffect(() => {
     if (premiumChecked === null) {
-      const premium = Boolean(isPremiumUser);
+      const premium = Boolean(isPremiumUser && isAccountOldEnough);
       setPremiumChecked(premium);
     }
-  }, [isPremiumUser, premiumChecked]);
+  }, [isPremiumUser, isAccountOldEnough, premiumChecked]);
 
   useEffect(() => {
     console.log('tonAddress changed:', tonAddress);
@@ -170,13 +172,6 @@ export function RegisterClient() {
     }
   };
 
-  // Step 4: if wallet is already connected, skip connect UI and register with existing tonAddress
-  useEffect(() => {
-    if (step === 4 && tonAddress && nickname && nicknameAvailable && !registering) {
-      handleRegister();
-    }
-  }, [step, tonAddress, nickname, nicknameAvailable]);
-
   const containerStyle: React.CSSProperties = {
     position: 'relative',
     zIndex: 10,
@@ -204,6 +199,9 @@ export function RegisterClient() {
 
   const buttonStyle: React.CSSProperties = {
     width: '100%',
+    maxWidth: '320px',
+    margin: '0 auto',
+    display: 'block',
     boxSizing: 'border-box',
     padding: '1rem 1.5rem',
     background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
@@ -216,6 +214,10 @@ export function RegisterClient() {
   };
 
   const continueButtonStyle: React.CSSProperties = {
+    width: '100%',
+    maxWidth: '320px',
+    margin: '0 auto',
+    display: 'block',
     background: '#a855f7',
     color: '#ffffff',
     border: 'none',
@@ -394,18 +396,8 @@ export function RegisterClient() {
             {registering && <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.7)' }}>Registering...</p>}
             {tonAddress && !registering && (
               <button
-                onClick={() => handleRegister()}
-                style={{
-                  background: '#a855f7',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '0.75rem',
-                  padding: '12px 32px',
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  marginTop: '1rem',
-                }}
+                onClick={() => handleRegister(tonAddress)}
+                style={{ ...buttonStyle, background: '#a855f7', marginTop: '1rem' }}
               >
                 Complete Registration
               </button>
@@ -414,6 +406,10 @@ export function RegisterClient() {
               <button
                 onClick={() => handleRegister('')}
                 style={{
+                  width: '100%',
+                  maxWidth: '320px',
+                  margin: '0 auto',
+                  display: 'block',
                   background: 'transparent',
                   color: 'rgba(255,255,255,0.7)',
                   border: '1px solid rgba(255,255,255,0.3)',
