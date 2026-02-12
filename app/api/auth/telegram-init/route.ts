@@ -8,6 +8,7 @@ import { createHmac } from 'crypto';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('telegram-init called, initData length:', body?.initData?.length ?? 0, 'first 100 chars:', body?.initData?.substring(0, 100) ?? 'empty');
     const { initData } = body;
 
     if (!initData || typeof initData !== 'string') {
