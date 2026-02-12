@@ -46,6 +46,21 @@ export function RegisterClient() {
   }, []);
 
   useEffect(() => {
+    if (!telegramId) return;
+    fetch(`/api/auth/me?telegramId=${telegramId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.exists) {
+          if (data.user?.id) {
+            localStorage.setItem('matrix_ton_user_id', String(data.user.id));
+          }
+          router.replace('/tables');
+        }
+      })
+      .catch(() => {});
+  }, [telegramId, router]);
+
+  useEffect(() => {
     if (premiumChecked === null) {
       const premium = Boolean(isPremiumUser);
       setPremiumChecked(premium);
