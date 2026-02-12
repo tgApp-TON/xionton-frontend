@@ -15,6 +15,8 @@ export function RegisterClient() {
     padding: '2rem 1.5rem',
     background: '#000000',
     borderRadius: '1.5rem',
+    zIndex: 10,
+    position: 'relative',
   };
 
   const buttonStyle: React.CSSProperties = {
@@ -54,6 +56,13 @@ export function RegisterClient() {
   const [registerAttempt, setRegisterAttempt] = useState(0);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem('matrix_ton_user_id')) {
+      router.replace('/tables');
+    }
+  }, [router]);
+
+  useEffect(() => {
     if (step !== 2) return;
     if (!tonAddress) return;
     setStep(3);
@@ -89,6 +98,19 @@ export function RegisterClient() {
         return;
       }
 
+      const isDuplicateWallet =
+        res.status === 409 ||
+        (data?.error && /duplicate key|unique constraint|duplicate/i.test(String(data.error)));
+      if (isDuplicateWallet) {
+        const meRes = await fetch(`/api/auth/me?telegramId=${encodeURIComponent(telegramId)}`);
+        const meData = await meRes.json();
+        if (meData?.user?.id) {
+          localStorage.setItem('matrix_ton_user_id', String(meData.user.id));
+        }
+        router.replace('/tables');
+        return;
+      }
+
       setError(data?.error || 'Registration failed');
     } catch {
       setError('Registration failed');
@@ -109,6 +131,9 @@ export function RegisterClient() {
       className="min-h-screen"
       style={{
         background: '#000000',
+        minHeight: '100vh',
+        zIndex: 10,
+        position: 'relative',
         padding: '48px 16px',
         display: 'flex',
         alignItems: 'center',
@@ -127,6 +152,8 @@ export function RegisterClient() {
             minHeight: '100vh',
             width: '100%',
             background: '#000000',
+            zIndex: 10,
+            position: 'relative',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -154,7 +181,7 @@ export function RegisterClient() {
           </p>
           <div
             style={{
-              background: 'rgba(255,255,255,0.08)',
+              background: '#000000',
               border: '1px solid rgba(255,255,255,0.15)',
               borderRadius: '16px',
               padding: '20px',
@@ -162,6 +189,8 @@ export function RegisterClient() {
               width: '100%',
               margin: '20px auto',
               boxSizing: 'border-box',
+              zIndex: 10,
+              position: 'relative',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', marginBottom: '16px' }}>
@@ -255,7 +284,7 @@ export function RegisterClient() {
         <div style={containerStyle}>
           <div style={{ textAlign: 'center', marginBottom: '18px' }}>
             <h2 style={{ color: '#ffffff', fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Connect Wallet</h2>
-            <p style={{ ...subtitleStyle, marginTop: '10px' }}>TON wallet required to participate</p>
+            <p style={{ color: '#cccccc', margin: '10px 0 0 0' }}>TON wallet required to participate</p>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -278,7 +307,7 @@ export function RegisterClient() {
               <button
                 onClick={() => setRegisterAttempt((x) => x + 1)}
                 disabled={registering}
-                style={{ ...buttonStyle, opacity: registering ? 0.7 : 1 }}
+                style={{ ...buttonStyle, color: '#ffffff', opacity: registering ? 0.7 : 1 }}
               >
                 Retry
               </button>
