@@ -134,36 +134,6 @@ export default function TablesPage() {
     <div className="min-h-screen relative">
       {!loading && <ScrollButtons />}
       <div className="w-full relative z-10" style={{ paddingTop: '70px' }}>
-        {!loading && (userNickname || userWallet) && (
-          <div
-            style={{
-              maxWidth: '420px',
-              margin: '0 auto 24px auto',
-              background: 'rgba(168,85,247,0.1)',
-              border: '1px solid rgba(168,85,247,0.3)',
-              borderRadius: '16px',
-              padding: '20px',
-              marginBottom: '16px',
-            }}
-          >
-            <h3 style={{ color: '#ffffff', fontWeight: 700, fontSize: '1.1rem', margin: '0 0 16px 0' }}>Your Account</h3>
-            {userNickname && (
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ color: '#aaaaaa', fontSize: '0.9rem', margin: '0 0 4px 0' }}>Nickname</p>
-                <p style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', margin: 0 }}>{userNickname}</p>
-              </div>
-            )}
-            {userWallet && (
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ color: '#aaaaaa', fontSize: '0.9rem', margin: '0 0 4px 0' }}>Wallet</p>
-                <p style={{ color: '#aaaaaa', fontSize: '0.9rem', margin: 0 }}>
-                  {userWallet.slice(0, 6)}...{userWallet.slice(-4)}
-                </p>
-              </div>
-            )}
-            <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '12px 0 0 0' }}>One nickname = one wallet</p>
-          </div>
-        )}
         <div
           className="grid grid-cols-2 pt-[90px] mb-12"
           style={{
