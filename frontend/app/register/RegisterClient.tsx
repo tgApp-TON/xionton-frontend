@@ -7,7 +7,7 @@ import { useTelegram } from '@/components/providers/TelegramProvider';
 
 export function RegisterClient() {
   const router = useRouter();
-  const { user } = useTelegram();
+  const { user, webApp } = useTelegram();
   const tonAddress = useTonAddress();
   const containerStyle: React.CSSProperties = {
     maxWidth: '420px',
@@ -72,9 +72,33 @@ export function RegisterClient() {
     setRegistering(true);
     setError(null);
 
-    const telegramIdRaw = user?.id;
-    const telegramId = telegramIdRaw != null ? String(telegramIdRaw) : String(Date.now());
-    const telegramUsername = user?.username;
+    let telegramId: string;
+    let telegramUsername: string | undefined;
+
+    if (webApp?.initData) {
+      try {
+        const initRes = await fetch('/api/auth/telegram-init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData: webApp.initData }),
+        });
+        const initData = await initRes.json();
+        if (initData.valid === true && initData.user) {
+          telegramId = String(initData.user.id);
+          telegramUsername = initData.user.username;
+        } else {
+          telegramId = String(Date.now());
+          telegramUsername = user?.username;
+        }
+      } catch {
+        telegramId = String(Date.now());
+        telegramUsername = user?.username;
+      }
+    } else {
+      telegramId = user?.id != null ? String(user.id) : String(Date.now());
+      telegramUsername = user?.username;
+    }
+
     const nickname = `user_${Math.floor(Math.random() * 900000) + 100000}`;
 
     try {
