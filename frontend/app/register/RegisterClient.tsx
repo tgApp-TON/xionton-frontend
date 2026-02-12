@@ -393,6 +393,8 @@ export function RegisterClient() {
               value={nickname}
               onChange={(e) => setNickname(e.target.value.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20))}
               placeholder="nickname"
+              autoCapitalize="none"
+              autoCorrect="off"
               style={{
                 ...inputStyle,
                 marginBottom: '0.5rem',
