@@ -143,7 +143,12 @@ export function StatsScreen({ isOpen, onClose }: StatsScreenProps) {
 
         <div className="relative z-10 h-full overflow-y-auto">
           <div className="flex items-center justify-center p-6 border-b border-gray-700">
-            <h1 className="text-3xl font-bold" style={{ color: '#ffffff' }}>Statistics</h1>
+            <div style={{ textAlign: 'center' }}>
+              <h1 className="text-3xl font-bold" style={{ color: '#ffffff' }}>Statistics</h1>
+              {userNickname && (
+                <p style={{ color: '#a855f7', fontSize: '1rem', fontWeight: 600, margin: '4px 0 0 0' }}>@{userNickname}</p>
+              )}
+            </div>
           </div>
 
           <div className="p-6 space-y-6">
