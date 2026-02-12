@@ -32,8 +32,9 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [referralCode, setReferralCode] = useState<string | null>(null);
 
   useEffect(() => {
-    function tryInit() {
+    function tryInit(attempt: number = 0) {
       const tg: any = (window as any).Telegram?.WebApp;
+      console.log('tryInit attempt', attempt, 'tg:', !!tg, 'initData:', tg?.initData?.substring(0, 100), 'user:', JSON.stringify(tg?.initDataUnsafe?.user));
       if (!tg) return false;
 
       let u = tg.initDataUnsafe?.user;
@@ -47,7 +48,6 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
           }
         } catch (e) {}
       }
-      console.log('tryInit tg:', !!tg, 'user:', JSON.stringify(u));
 
       if (!u) return false;
 
@@ -72,13 +72,13 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       return true;
     }
 
-    if (tryInit()) return;
+    if (tryInit(0)) return;
 
     // Retry every 100ms up to 30 times (3s total)
     let attempts = 0;
     const interval = setInterval(() => {
       attempts++;
-      if (tryInit() || attempts >= 30) {
+      if (tryInit(attempts) || attempts >= 30) {
         clearInterval(interval);
         setIsReady(true);
       }

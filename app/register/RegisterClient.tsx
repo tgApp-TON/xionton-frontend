@@ -27,9 +27,9 @@ export function RegisterClient() {
   const [checkingNickname, setCheckingNickname] = useState(false);
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
-  const [showNoTelegramMessage, setShowNoTelegramMessage] = useState(false);
 
   const telegramId = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.id ?? user?.id : user?.id;
+  console.log('REGISTER LOADED, telegramId:', telegramId, 'isReady:', isReady, 'user:', JSON.stringify(user));
 
   const telegramUsername = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.username ?? user?.username : user?.username;
   const isPremiumUser = typeof window !== 'undefined' ? WebApp?.initDataUnsafe?.user?.is_premium ?? isPremium : isPremium;
@@ -234,54 +234,6 @@ export function RegisterClient() {
     cursor: 'pointer',
     marginTop: '1rem',
   };
-
-  useEffect(() => {
-    if (!isReady || telegramId) return;
-    const t = setTimeout(() => setShowNoTelegramMessage(true), 5000);
-    return () => clearTimeout(t);
-  }, [isReady, telegramId]);
-
-  if (!isReady) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center" style={{ padding: '2rem' }}>
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500" />
-        <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', marginTop: '1rem' }}>Loading...</p>
-      </div>
-    );
-  }
-
-  if (!telegramId) {
-    if (!showNoTelegramMessage) {
-      return (
-        <div className="min-h-screen flex flex-col items-center justify-center" style={{ padding: '2rem' }}>
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500" />
-          <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '1rem', marginTop: '1rem' }}>Loading...</p>
-        </div>
-      );
-    }
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center" style={{ padding: '2rem' }}>
-        <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1.125rem', textAlign: 'center', marginBottom: '1.5rem' }}>
-          Please open this app in Telegram mobile app
-        </p>
-        <a
-          href="https://t.me/MatrixTONTON_Bot"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            padding: '1rem 1.5rem',
-            background: 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)',
-            borderRadius: '0.75rem',
-            color: '#fff',
-            fontWeight: 600,
-            textDecoration: 'none',
-          }}
-        >
-          Open in Telegram
-        </a>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen relative" style={{ paddingTop: '70px' }}>
