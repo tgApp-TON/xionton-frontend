@@ -10,47 +10,18 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get user's tables
     const { data: tables, error } = await supabase
       .from('Table')
-      .select(`
-        id,
-        tableNumber,
-        status,
-        cycleNumber,
-        createdAt,
-        closedAt
-      `)
+      .select('id, tableNumber, status, cycleNumber, createdAt, closedAt')
       .eq('userId', parseInt(userId))
       .order('tableNumber', { ascending: true });
 
-    if (error) throw error;
+    if (error) {
+      return NextResponse.json({ error: error.message, details: error }, { status: 500 });
+    }
 
-    // Get positions for each table
-    const tablesWithPositions = await Promise.all(
-      (tables || []).map(async (table) => {
-        const { data: positions } = await supabase
-          .from('TablePosition')
-          .select('id, position, partnerUserId, amountPaid, status')
-          .eq('tableId', table.id)
-          .order('position', { ascending: true });
-
-        return {
-          ...table,
-          positions: positions || [],
-          filledSlots: positions?.length || 0
-        };
-      })
-    );
-
-    return NextResponse.json({ 
-      success: true, 
-      tables: tablesWithPositions 
-    });
-  } catch (error) {
-    console.error('Tables fetch error:', error);
-    return NextResponse.json({ 
-      error: 'Failed to fetch tables' 
-    }, { status: 500 });
+    return NextResponse.json({ success: true, tables: tables || [] });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Failed to fetch tables' }, { status: 500 });
   }
 }

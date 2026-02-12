@@ -30,7 +30,6 @@ model User {
   fraudScore         Int             @default(0)
   ipAddress          String?
   deviceInfo         String?
-  metadata           Json?           // Stores additional user data (firstName, lastName, languageCode, etc.)
   registeredAt       DateTime        @default(now())
   lastActive         DateTime        @default(now())
   activityLog        ActivityLog[]

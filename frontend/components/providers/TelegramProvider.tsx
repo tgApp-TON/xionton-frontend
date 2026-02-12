@@ -36,21 +36,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
     const initDataUnsafe = tg?.initDataUnsafe;
     let userFromUnsafe = initDataUnsafe?.user;
 
-    console.log('user from initDataUnsafe:', userFromUnsafe);
-
-    // web.telegram.org (K) may not populate initDataUnsafe.user; try parsing initData string
-    if (!userFromUnsafe && tg?.initData) {
-      try {
-        const params = new URLSearchParams(tg.initData);
-        const userStr = params.get('user');
-        if (userStr) {
-          userFromUnsafe = JSON.parse(userStr) as TelegramUser;
-          console.log('user parsed from initData string:', userFromUnsafe);
-        }
-      } catch (e) {
-        console.warn('Failed to parse initData user:', e);
-      }
-    }
+    console.log('userFromUnsafe:', JSON.stringify(userFromUnsafe));
+    console.log('initDataUnsafe full:', JSON.stringify(initDataUnsafe));
 
     // telegramId for consumers = user?.id ?? null (no fallback id)
     if (typeof window !== 'undefined' && tg) {
@@ -72,7 +59,7 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
         setUser(null);
       }
 
-      const startParam = initDataUnsafe?.start_param ?? new URLSearchParams(tg.initData || '').get('start_param');
+      const startParam = initDataUnsafe?.start_param ?? null;
       if (startParam) {
         setReferralCode(startParam);
         console.log('Referral code from URL:', startParam);

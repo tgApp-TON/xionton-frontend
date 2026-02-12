@@ -152,11 +152,13 @@ export default function TablesPage() {
               const isActive = !!userTable && userTable.status === 'ACTIVE';
               const price = TABLE_PRICES[tableNumber] ?? 0;
               const positions = userTable?.positions ?? [];
+              // Only pass nickname for display (never telegramUsername/telegramId)
+              const toSlot = (p: any) => p ? { nickname: p.partnerNickname ?? p.nickname, filled: true } : null;
               const slots: [(any | null)?, (any | null)?, (any | null)?, (any | null)?] = [
-                positions.find((p: any) => p.position === 1) || null,
-                positions.find((p: any) => p.position === 2) || null,
-                positions.find((p: any) => p.position === 3) || null,
-                positions.find((p: any) => p.position === 4) || null,
+                toSlot(positions.find((p: any) => p.position === 1) ?? null),
+                toSlot(positions.find((p: any) => p.position === 2) ?? null),
+                toSlot(positions.find((p: any) => p.position === 3) ?? null),
+                toSlot(positions.find((p: any) => p.position === 4) ?? null),
               ];
               const cycles = userTable ? (userTable.cycleNumber ?? 1) - 1 : 0;
               const prevTableActive = userTables.some((t: any) => t.tableNumber === tableNumber - 1 && t.status === 'ACTIVE');

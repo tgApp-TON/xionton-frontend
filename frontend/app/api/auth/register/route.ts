@@ -20,7 +20,21 @@ export async function POST(request: NextRequest) {
       .eq('telegramId', String(telegramId));
 
     if (existingUsers && existingUsers.length > 0) {
-      return NextResponse.json({ success: true, user: existingUsers[0] });
+      const existing = existingUsers[0];
+      // Update telegramUsername on every login if it changed
+      if (telegramUsername != null && String(telegramUsername) !== (existing.telegramUsername ?? '')) {
+        await supabase
+          .from('User')
+          .update({ telegramUsername: telegramUsername || null })
+          .eq('id', existing.id);
+        const { data: updated } = await supabase
+          .from('User')
+          .select('*')
+          .eq('id', existing.id)
+          .single();
+        return NextResponse.json({ success: true, user: updated ?? existing });
+      }
+      return NextResponse.json({ success: true, user: existing });
     }
 
     // referrerId defaults to 1 (MASTER)

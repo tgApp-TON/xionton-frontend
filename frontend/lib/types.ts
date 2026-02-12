@@ -1,3 +1,17 @@
+// Re-export everything from types/index.ts for convenience
+export * from './types/index';
+
+// Also export DashboardData and related types directly for easier imports
+export type {
+  DashboardData,
+  User,
+  UserStats,
+  Transaction,
+  PendingPayout,
+  Referral
+} from './types/index';
+
+// Keep these exports for backward compatibility
 export interface Table {
   id: number;
   userId: number;
@@ -36,5 +50,5 @@ export const TABLE_PRICES: Record<number, number> = {
   9: 2560,
   10: 5120,
   11: 10240,
-  12: 20480,
+  12: 20480
 };
