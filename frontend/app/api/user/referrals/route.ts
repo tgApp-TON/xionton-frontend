@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const { data: currentUser, error: userError } = await supabase
       .from('User')
-      .select('referralCode, referrerId')
+      .select('referralCode, referrerId, nickname')
       .eq('id', id)
       .single();
     if (userError || !currentUser) {
@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
     }
     const referralCode = currentUser.referralCode ?? '';
     const referrerId = currentUser.referrerId ?? null;
+    const currentUserNickname = currentUser.nickname ?? 'You';
 
     let sponsor: { nickname: string; activeTables: number; referralsCount: number } | null = null;
     if (referrerId != null && referrerId !== 1) {
@@ -95,6 +96,19 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    let tablesByUser: Record<number, { tableNumber: number; status: string }[]> = {};
+    if (referralIds.length > 0) {
+      const { data: allTables } = await supabase
+        .from('Table')
+        .select('userId, tableNumber, status')
+        .in('userId', referralIds);
+      referralIds.forEach((uid: number) => (tablesByUser[uid] = []));
+      (allTables || []).forEach((t: { userId: number; tableNumber: number; status: string }) => {
+        if (!tablesByUser[t.userId]) tablesByUser[t.userId] = [];
+        tablesByUser[t.userId].push({ tableNumber: t.tableNumber, status: t.status });
+      });
+    }
+
     const referrals = list.map((u: { id: number; nickname: string; registeredAt: string }) => ({
       id: u.id,
       nickname: u.nickname,
@@ -102,6 +116,7 @@ export async function GET(request: NextRequest) {
       referralsCount: referralsCountByUser[u.id] ?? 0,
       totalEarned: totalEarnedByUser[u.id] ?? 0,
       createdAt: u.registeredAt,
+      tables: tablesByUser[u.id] ?? [],
     }));
 
     const totalReferrals = referrals.length;
@@ -110,6 +125,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       referralCode,
+      currentUserNickname,
       sponsor,
       referrals,
       totalReferrals,

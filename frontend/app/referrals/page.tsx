@@ -8,6 +8,8 @@ const BOT_LINK = 'https://t.me/MatrixTONTON_Bot';
 
 type FilterTab = 'all' | 'workers' | 'loosers';
 
+type TableSlot = { tableNumber: number; status: string };
+
 type ReferralItem = {
   id: number;
   nickname: string;
@@ -15,6 +17,7 @@ type ReferralItem = {
   referralsCount: number;
   totalEarned: number;
   createdAt: string;
+  tables: TableSlot[];
 };
 
 export default function ReferralsPage() {
@@ -23,6 +26,7 @@ export default function ReferralsPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [data, setData] = useState<{
     referralCode: string;
+    currentUserNickname?: string;
     sponsor: { nickname: string; activeTables: number; referralsCount: number } | null;
     referrals: ReferralItem[];
     totalReferrals: number;
@@ -103,6 +107,41 @@ export default function ReferralsPage() {
     textTransform: 'uppercase' as const,
     letterSpacing: '0.1em',
     marginBottom: '8px',
+  };
+
+  const tableProgressForReferral = (tables: TableSlot[]) => {
+    const byNum: Record<number, string> = {};
+    (tables || []).forEach((t) => {
+      byNum[t.tableNumber] = t.status;
+    });
+    return (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '8px' }}>
+        {Array.from({ length: 12 }, (_, i) => i + 1).map((num) => {
+          const status = byNum[num];
+          const isActive = status === 'ACTIVE';
+          return (
+            <div
+              key={num}
+              style={{
+                width: '18px',
+                height: '18px',
+                borderRadius: '50%',
+                background: isActive ? '#22c55e' : 'transparent',
+                border: isActive ? 'none' : '1px solid rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '8px',
+                color: isActive ? '#fff' : '#666',
+              }}
+              title={`Table ${num}: ${isActive ? 'Active' : 'Not purchased'}`}
+            >
+              {num}
+            </div>
+          );
+        })}
+      </div>
+    );
   };
 
   const statBox = (label: string, value: number | string, valueColor: string) => (
@@ -282,6 +321,91 @@ export default function ReferralsPage() {
 
             {/* Section 4 - Referrals list (filtered) */}
             <p style={{ ...sectionHeader, marginTop: '24px' }}>Your Referrals</p>
+            {/* Tree visualization */}
+            {data?.referrals != null && data.referrals.length > 0 && (
+              <div style={{ width: '100%', overflowX: 'auto', padding: '16px 0', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 'max-content' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '44px',
+                        height: '44px',
+                        borderRadius: '50%',
+                        background: '#a855f7',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '10px',
+                        fontWeight: 700,
+                        color: '#fff',
+                        textAlign: 'center',
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      YOU
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: '#888', marginTop: '4px', maxWidth: '60px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {data.currentUserNickname ?? 'You'}
+                    </div>
+                  </div>
+                  {(data.referrals.length > 8 ? data.referrals.slice(0, 8) : data.referrals).map((r, idx) => (
+                    <div key={r.id} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                      <div
+                        style={{
+                          width: '2px',
+                          height: '24px',
+                          background: 'rgba(255,255,255,0.2)',
+                          marginRight: idx === 0 ? '8px' : '4px',
+                        }}
+                      />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div
+                          style={{
+                            width: '40px',
+                            height: '40px',
+                            borderRadius: '50%',
+                            background: r.activeTables >= 1 ? '#22c55e' : '#ef4444',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '9px',
+                            fontWeight: 600,
+                            color: '#fff',
+                            textAlign: 'center',
+                          }}
+                        >
+                          {(r.nickname || '').slice(0, 8)}
+                        </div>
+                        <div style={{ fontSize: '0.65rem', color: '#888', marginTop: '2px' }}>{r.activeTables} tbl</div>
+                      </div>
+                    </div>
+                  ))}
+                  {data.referrals.length > 8 && (
+                    <div style={{ marginLeft: '8px', fontSize: '0.8rem', color: '#888', alignSelf: 'center' }}>
+                      +{data.referrals.length - 8} more
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {/* Legend */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px', fontSize: '0.75rem', color: '#888' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#22c55e' }} />
+                Active
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span style={{ width: '10px', height: '10px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.3)' }} />
+                Not purchased
+              </span>
+            </div>
             {filteredReferrals.length === 0 ? (
               <p style={{ color: '#888888', fontSize: '0.9rem', marginTop: '8px' }}>
                 {activeFilter === 'workers' && 'No workers yet.'}
@@ -313,6 +437,7 @@ export default function ReferralsPage() {
                     <div style={{ color: '#a855f7', fontSize: '0.9rem', fontWeight: 600 }}>
                       Earned: {Number(r.totalEarned).toFixed(2)} TON
                     </div>
+                    {tableProgressForReferral(r.tables ?? [])}
                   </div>
                 ))}
               </div>
