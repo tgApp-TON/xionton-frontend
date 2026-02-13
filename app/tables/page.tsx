@@ -4,10 +4,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { CanvasTableCard } from '@/components/tables/CanvasTableCard';
 import { ScrollButtons } from '@/components/ScrollButtons';
+import { MenuPanel } from '@/components/layout/MenuPanel';
 import { TABLE_PRICES } from '@/lib/types';
 
 export default function TablesPage() {
   const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userTables, setUserTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -132,7 +134,37 @@ export default function TablesPage() {
 
   return (
     <div className="min-h-screen relative">
-      {!loading && <ScrollButtons />}
+      {!loading && (
+        <>
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(true)}
+            style={{
+              position: 'fixed',
+              top: '12px',
+              right: '12px',
+              zIndex: 99999,
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'rgba(168,85,247,0.2)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(168,85,247,0.4)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+            }}
+          >
+            <span style={{ width: '28px', height: '3px', background: 'rgba(168,85,247,0.9)', borderRadius: '10px' }} />
+            <span style={{ width: '28px', height: '3px', background: 'rgba(168,85,247,0.9)', borderRadius: '10px' }} />
+            <span style={{ width: '28px', height: '3px', background: 'rgba(168,85,247,0.9)', borderRadius: '10px' }} />
+          </button>
+          <ScrollButtons />
+        </>
+      )}
       <div className="w-full relative z-10" style={{ paddingTop: '70px' }}>
         <div
           className="grid grid-cols-2 pt-[90px] mb-12"
@@ -204,6 +236,7 @@ export default function TablesPage() {
           )}
         </div>
       </div>
+      <MenuPanel isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </div>
   );
 }
