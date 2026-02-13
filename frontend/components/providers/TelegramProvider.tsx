@@ -34,7 +34,6 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     function tryInit(attempt: number = 0) {
       const tg: any = (window as any).Telegram?.WebApp;
-      console.log('tryInit attempt', attempt, 'tg:', !!tg, 'initData:', tg?.initData?.substring(0, 100), 'user:', JSON.stringify(tg?.initDataUnsafe?.user));
       if (!tg) return false;
 
       let u = tg.initDataUnsafe?.user;
@@ -44,7 +43,6 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
           const userStr = params.get('user');
           if (userStr) {
             u = JSON.parse(userStr);
-            console.log('user parsed from initData:', u);
           }
         } catch (e) {}
       }

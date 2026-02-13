@@ -29,18 +29,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <script src="https://telegram.org/js/telegram-web-app.js" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-  (function() {
-    var script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/eruda';
-    script.onload = function() { eruda.init(); };
-    document.head.appendChild(script);
-  })();
-`,
-          }}
-        />
       </head>
       <body className={inter.className}>
         <AnimatedBackground />

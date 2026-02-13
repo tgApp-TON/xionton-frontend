@@ -71,21 +71,18 @@ export function RegisterClient() {
       const match = hash.match(/%22id%22%3A(\d+)/);
       if (match) {
         telegramId = parseInt(match[1], 10);
-        console.log('telegramId from URL hash:', telegramId);
       }
     }
-    console.log('register check - isReady:', isReady, 'telegramId:', telegramId);
     if (!telegramId) return;
     fetch(`/api/auth/me?telegramId=${telegramId}`)
       .then((r) => r.json())
       .then((data) => {
-        console.log('me response:', JSON.stringify(data));
         if (data.exists && data.user?.id) {
           localStorage.setItem('matrix_ton_user_id', String(data.user.id));
           router.replace('/tables');
         }
       })
-      .catch((e) => { console.log('me error:', e); });
+      .catch(() => {});
   }, [router, isReady]);
 
   useEffect(() => {
@@ -104,14 +101,10 @@ export function RegisterClient() {
     const tgWebApp = typeof window !== 'undefined' ? (window as any)?.Telegram?.WebApp : null;
     const tgUser = tgWebApp?.initDataUnsafe?.user;
 
-    console.log('WebApp direct user:', tgUser);
-
     if (tgUser) {
       if (tgUser.id) effectiveTelegramId = String(tgUser.id);
       if (tgUser.username) effectiveTelegramUsername = tgUser.username;
     }
-
-    console.log('After WebApp direct:', { effectiveTelegramId, effectiveTelegramUsername });
 
     if (webApp?.initData) {
       try {
@@ -131,7 +124,6 @@ export function RegisterClient() {
     }
 
     const walletToSend = tonAddress || '';
-    console.log('Final register data:', { effectiveTelegramId, effectiveTelegramUsername });
 
     try {
       const res = await fetch('/api/auth/register', {
