@@ -15,6 +15,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
   const tonAddress = useTonAddress();
   const hasInitialWalletRun = useRef(false);
   const [stats, setStats] = useState<{ nickname: string; activeTables: number; totalCycles: number } | null>(null);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
   useEffect(() => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('matrix_ton_user_id') : null;
@@ -91,18 +92,27 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
       </button>
 
       <div style={{ position: 'relative', zIndex: 999999, padding: '80px 24px 24px' }}>
-        {/* Section 1 - Wallet */}
-        <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '0 0 4px 0' }}>Wallet</p>
-        {tonAddress ? (
-          <p style={{ color: '#888888', fontSize: '0.75rem', margin: '0 0 0 0', wordBreak: 'break-all' }}>
-            {tonAddress}
-          </p>
-        ) : null}
-        <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '12px 0 6px 0' }}>
-          {tonAddress ? 'Connected wallet:' : 'No wallet connected'}
-        </p>
-        <div style={{ marginTop: '12px', marginBottom: '16px' }}>
-          <TonConnectButton />
+        {/* Section 1 - Wallet (clickable) */}
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setIsWalletModalOpen(true)}
+          onKeyDown={(e) => e.key === 'Enter' && setIsWalletModalOpen(true)}
+          style={{
+            cursor: 'pointer',
+            marginBottom: '16px',
+          }}
+        >
+          <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '0 0 4px 0' }}>Wallet</p>
+          {tonAddress ? (
+            <p style={{ color: '#888888', fontSize: '0.75rem', margin: '0 0 0 0', wordBreak: 'break-all' }}>
+              {tonAddress}
+            </p>
+          ) : (
+            <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '12px 0 0 0' }}>
+              No wallet connected
+            </p>
+          )}
         </div>
 
         <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '16px 0' }} />
@@ -161,6 +171,59 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
           </button>
         </div>
       </div>
+
+      {/* Wallet modal */}
+      {isWalletModalOpen && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 9999999,
+            background: 'rgba(0,0,0,0.98)',
+            color: '#ffffff',
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setIsWalletModalOpen(false)}
+            style={{
+              position: 'fixed',
+              top: '16px',
+              right: '16px',
+              width: '48px',
+              height: '48px',
+              borderRadius: '50%',
+              background: 'rgba(168,85,247,0.3)',
+              border: '1px solid rgba(168,85,247,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <X size={24} style={{ color: '#fff' }} />
+          </button>
+          <div style={{ padding: '80px 24px 24px', maxWidth: '420px', margin: '0 auto' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '24px' }}>Wallet</h2>
+            {tonAddress ? (
+              <>
+                <p style={{ color: '#aaaaaa', fontSize: '0.9rem', marginBottom: '8px' }}>Current wallet:</p>
+                <p style={{ color: '#ffffff', fontSize: '0.85rem', wordBreak: 'break-all', marginBottom: '20px', lineHeight: 1.5 }}>
+                  {tonAddress}
+                </p>
+              </>
+            ) : (
+              <p style={{ color: '#aaaaaa', fontSize: '0.9rem', marginBottom: '20px' }}>No wallet connected</p>
+            )}
+            <p style={{ color: '#888888', fontSize: '0.85rem', marginBottom: '24px', lineHeight: 1.5 }}>
+              Connect your TON wallet to participate in Matrix TON. When you connect a new wallet, it replaces your current one.
+            </p>
+            <div style={{ marginTop: '12px' }}>
+              <TonConnectButton />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

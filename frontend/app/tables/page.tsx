@@ -149,13 +149,7 @@ export default function TablesPage() {
   };
 
   return (
-    <div
-      className="min-h-screen relative"
-      style={{
-        minHeight: '100vh',
-        filter: isGrayscale ? 'grayscale(100%)' : undefined,
-      }}
-    >
+    <div className="min-h-screen relative" style={{ minHeight: '100vh' }}>
       {!loading && (
         <>
           <button
@@ -212,7 +206,14 @@ export default function TablesPage() {
           <ScrollButtons />
         </>
       )}
-      <div className="w-full relative z-10" style={{ paddingTop: '70px' }}>
+      <div
+        className="w-full relative z-10"
+        style={{
+          paddingTop: '70px',
+          minHeight: '100vh',
+          filter: isGrayscale ? 'grayscale(100%)' : undefined,
+        }}
+      >
         <div
           className="grid grid-cols-2 pt-[90px] mb-12"
           style={{
