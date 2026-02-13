@@ -1,6 +1,6 @@
 /**
  * Cleanup non-founder users and their related data from Supabase.
- * Uses SUPABASE_URL and SUPABASE_SERVICE_KEY from .env.local.
+ * Uses SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from .env.local.
  *
  * Run: cd frontend && npx ts-node --project tsconfig.json scripts/cleanup-users.ts
  */
@@ -13,14 +13,14 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY in .env.local');
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local');
   process.exit(1);
 }
 
-const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 async function main() {
   console.log('Fetching non-founder user IDs...');
