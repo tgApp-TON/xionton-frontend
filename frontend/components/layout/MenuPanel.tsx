@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
-import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react';
 
 interface MenuPanelProps {
   isOpen: boolean;
@@ -13,7 +13,6 @@ interface MenuPanelProps {
 export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
   const router = useRouter();
   const tonAddress = useTonAddress();
-  const [tonConnectUI] = useTonConnectUI();
   const hasInitialWalletRun = useRef(false);
   const [stats, setStats] = useState<{ nickname: string; activeTables: number; totalCycles: number } | null>(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -55,52 +54,6 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
   const goTo = (path: string) => {
     onClose();
     router.push(path);
-  };
-
-  const handleWalletAction = async () => {
-    if (!tonConnectUI) return;
-
-    if (tonAddress) {
-      await tonConnectUI.disconnect();
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    }
-
-    const wallets = await tonConnectUI.getWallets();
-    const telegramWallet =
-      wallets.find(
-        (w: { name?: string; appName?: string }) =>
-          w.name === 'Telegram Wallet' ||
-          w.appName === 'telegram-wallet' ||
-          w.name === 'Tonkeeper'
-      ) || wallets[0];
-
-    if (!telegramWallet) {
-      console.error('No wallets found');
-      return;
-    }
-
-    const walletSource = telegramWallet as { universalLink?: string; bridgeUrl?: string };
-    if (!walletSource.universalLink || !walletSource.bridgeUrl) {
-      console.error('Wallet missing universalLink or bridgeUrl');
-      return;
-    }
-
-    try {
-      const universalLink = tonConnectUI.connector.connect({
-        universalLink: walletSource.universalLink,
-        bridgeUrl: walletSource.bridgeUrl,
-      });
-      if (typeof universalLink === 'string') {
-        const tg = (window as any)?.Telegram?.WebApp;
-        if (tg?.openLink) {
-          tg.openLink(universalLink);
-        } else {
-          window.open(universalLink, '_blank');
-        }
-      }
-    } catch (e) {
-      console.error('Wallet connect error:', e);
-    }
   };
 
   return (
@@ -268,40 +221,9 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
             <p style={{ color: '#888888', fontSize: '0.85rem', marginBottom: '20px', lineHeight: 1.5 }}>
               Connect your TON wallet to participate in Matrix TON. When you connect a new wallet, it replaces your current one.
             </p>
-            <button
-              type="button"
-              onClick={handleWalletAction}
-              style={{
-                background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '1rem',
-                padding: '14px 24px',
-                borderRadius: '12px',
-                width: '100%',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
-              {tonAddress ? '🔄 Switch / Disconnect Wallet' : '🔗 Connect Wallet'}
-            </button>
-            <button
-              type="button"
-              onClick={() => tonConnectUI?.openModal?.()}
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(168,85,247,0.4)',
-                color: '#a855f7',
-                padding: '10px',
-                borderRadius: '8px',
-                width: '100%',
-                marginTop: '8px',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-              }}
-            >
-              Or open wallet selector
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <TonConnectButton />
+            </div>
           </div>
         </div>
       )}
