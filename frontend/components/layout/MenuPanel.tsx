@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
-import { TonConnectButton, useTonAddress } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 
 interface MenuPanelProps {
   isOpen: boolean;
@@ -13,6 +13,7 @@ interface MenuPanelProps {
 export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
   const router = useRouter();
   const tonAddress = useTonAddress();
+  const [tonConnectUI] = useTonConnectUI();
   const hasInitialWalletRun = useRef(false);
   const [stats, setStats] = useState<{ nickname: string; activeTables: number; totalCycles: number } | null>(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
@@ -208,17 +209,38 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
             {tonAddress ? (
               <>
                 <p style={{ color: '#aaaaaa', fontSize: '0.9rem', marginBottom: '8px' }}>Current wallet:</p>
-                <p style={{ color: '#ffffff', fontSize: '0.85rem', wordBreak: 'break-all', marginBottom: '20px', lineHeight: 1.5 }}>
+                <p style={{ color: '#ffffff', fontSize: '0.85rem', wordBreak: 'break-all', marginBottom: '12px', lineHeight: 1.5 }}>
                   {tonAddress}
+                </p>
+                <p style={{ color: '#888888', fontSize: '0.8rem', marginBottom: '20px' }}>
+                  Tap the button below to switch or disconnect wallet
                 </p>
               </>
             ) : (
               <p style={{ color: '#aaaaaa', fontSize: '0.9rem', marginBottom: '20px' }}>No wallet connected</p>
             )}
-            <p style={{ color: '#888888', fontSize: '0.85rem', marginBottom: '24px', lineHeight: 1.5 }}>
+            <p style={{ color: '#888888', fontSize: '0.85rem', marginBottom: '20px', lineHeight: 1.5 }}>
               Connect your TON wallet to participate in Matrix TON. When you connect a new wallet, it replaces your current one.
             </p>
-            <div style={{ marginTop: '12px' }}>
+            <button
+              type="button"
+              onClick={() => tonConnectUI?.openModal?.()}
+              style={{
+                background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '1rem',
+                padding: '14px 24px',
+                borderRadius: '12px',
+                width: '100%',
+                border: 'none',
+                cursor: 'pointer',
+                marginBottom: '16px',
+              }}
+            >
+              🔄 Switch / Connect Wallet
+            </button>
+            <div>
               <TonConnectButton />
             </div>
           </div>
