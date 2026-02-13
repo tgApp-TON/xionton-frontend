@@ -24,15 +24,24 @@ export async function GET(request: NextRequest) {
     const referrerId = currentUser.referrerId ?? null;
     const currentUserNickname = currentUser.nickname ?? 'You';
 
-    let myTotalEarned = 0;
-    const { data: myStats } = await supabase
+    // myTotalEarned: from UserStats for current user only; no row or invalid -> 0
+    const myStatsQuery = { from: 'UserStats', select: 'totalEarned', where: { userId: id } };
+    console.log('[referrals] UserStats (myTotalEarned) query', myStatsQuery);
+    const { data: myStats, error: myStatsError } = await supabase
       .from('UserStats')
       .select('totalEarned')
       .eq('userId', id)
       .single();
-    if (myStats?.totalEarned != null) {
+    console.log('[referrals] UserStats raw response', { data: myStats, error: myStatsError });
+    console.log('[referrals] Row returned for userId', id, '(myTotalEarned):', myStats ? { userId: id, totalEarned: myStats.totalEarned } : 'none');
+    let myTotalEarned = 0;
+    if (myStatsError || myStats == null) {
+      myTotalEarned = 0;
+    } else if (myStats.totalEarned == null || myStats.totalEarned === undefined) {
+      myTotalEarned = 0;
+    } else {
       const n = typeof myStats.totalEarned === 'string' ? parseFloat(myStats.totalEarned) : Number(myStats.totalEarned);
-      myTotalEarned = Number.isNaN(n) ? 0 : n;
+      myTotalEarned = Number.isNaN(n) || n < 0 ? 0 : n;
     }
 
     let sponsor: { nickname: string; activeTables: number; referralsCount: number } | null = null;
@@ -100,7 +109,7 @@ export async function GET(request: NextRequest) {
         .in('userId', referralIds);
       (userStatsRows || []).forEach((row: { userId: number; totalEarned: number | string }) => {
         const n = typeof row.totalEarned === 'string' ? parseFloat(row.totalEarned) : Number(row.totalEarned);
-        totalEarnedByUser[row.userId] = Number.isNaN(n) ? 0 : n;
+        totalEarnedByUser[row.userId] = Number.isNaN(n) || n < 0 ? 0 : n;
       });
       referralIds.forEach((uid: number) => {
         if (totalEarnedByUser[uid] === undefined) totalEarnedByUser[uid] = 0;

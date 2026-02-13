@@ -35,15 +35,24 @@ export async function GET(request: NextRequest) {
     const activeTables = (tables || []).filter((t) => t.status === 'ACTIVE').length;
     const totalCycles = (tables || []).reduce((sum, t) => sum + (t.cycleNumber ?? 0), 0);
 
-    let totalEarned = 0;
-    const { data: userStats } = await supabase
+    // UserStats: totalEarned comes from UserStats table only; if no row or invalid, return 0
+    const userStatsQuery = { from: 'UserStats', select: 'totalEarned', where: { userId: id } };
+    console.log('[stats] UserStats query', userStatsQuery);
+    const { data: userStats, error: userStatsError } = await supabase
       .from('UserStats')
       .select('totalEarned')
       .eq('userId', id)
       .single();
-    if (userStats?.totalEarned != null) {
+    console.log('[stats] UserStats raw response', { data: userStats, error: userStatsError });
+    console.log('[stats] Row returned for userId', id, ':', userStats ? { userId: id, totalEarned: userStats.totalEarned } : 'none');
+    let totalEarned = 0;
+    if (userStatsError || userStats == null) {
+      totalEarned = 0;
+    } else if (userStats.totalEarned == null || userStats.totalEarned === undefined) {
+      totalEarned = 0;
+    } else {
       const n = typeof userStats.totalEarned === 'string' ? parseFloat(userStats.totalEarned) : Number(userStats.totalEarned);
-      totalEarned = Number.isNaN(n) ? 0 : n;
+      totalEarned = Number.isNaN(n) || n < 0 ? 0 : n;
     }
 
     return NextResponse.json({
