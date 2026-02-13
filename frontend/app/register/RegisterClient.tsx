@@ -64,7 +64,16 @@ export function RegisterClient() {
     }
     if (!isReady) return;
     const tg: any = (window as any)?.Telegram?.WebApp;
-    const telegramId = tg?.initDataUnsafe?.user?.id;
+    // Try to get telegramId from URL hash (mobile Telegram passes it there)
+    let telegramId = tg?.initDataUnsafe?.user?.id;
+    if (!telegramId && typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      const match = hash.match(/%22id%22%3A(\d+)/);
+      if (match) {
+        telegramId = parseInt(match[1], 10);
+        console.log('telegramId from URL hash:', telegramId);
+      }
+    }
     console.log('register check - isReady:', isReady, 'telegramId:', telegramId);
     if (!telegramId) return;
     fetch(`/api/auth/me?telegramId=${telegramId}`)
