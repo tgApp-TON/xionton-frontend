@@ -61,9 +61,12 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
     if (!tonConnectUI) return;
     if (tonAddress) {
       await tonConnectUI.disconnect();
-      setTimeout(() => tonConnectUI.openModal(), 500);
-    } else {
-      tonConnectUI.openModal();
+      await new Promise((resolve) => setTimeout(resolve, 800));
+    }
+    try {
+      await tonConnectUI.openModal();
+    } catch (e) {
+      console.error('openModal error:', e);
     }
   };
 
