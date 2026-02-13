@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { Sun } from 'lucide-react';
 import { CanvasTableCard } from '@/components/tables/CanvasTableCard';
 import { ScrollButtons } from '@/components/ScrollButtons';
 import { MenuPanel } from '@/components/layout/MenuPanel';
@@ -10,6 +11,7 @@ import { TABLE_PRICES } from '@/lib/types';
 export default function TablesPage() {
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLightTheme, setIsLightTheme] = useState(false);
   const [userTables, setUserTables] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -133,9 +135,37 @@ export default function TablesPage() {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div
+      className="min-h-screen relative"
+      style={
+        isLightTheme
+          ? { backgroundColor: 'rgba(248, 250, 252, 0.92)', minHeight: '100vh' }
+          : undefined
+      }
+    >
       {!loading && (
         <>
+          <button
+            type="button"
+            onClick={() => setIsLightTheme((prev) => !prev)}
+            style={{
+              position: 'fixed',
+              top: '12px',
+              left: '12px',
+              zIndex: 99999,
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              background: 'rgba(168,85,247,0.2)',
+              border: '1px solid rgba(168,85,247,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            <Sun size={26} style={{ color: 'rgba(168,85,247,0.9)' }} />
+          </button>
           <button
             type="button"
             onClick={() => setIsMenuOpen(true)}
@@ -220,7 +250,13 @@ export default function TablesPage() {
               const isUnlocked = tableNumber === 1 || prevTableActive;
 
               return (
-                <div key={tableNumber} style={{ width: '44vw' }}>
+                <div
+                  key={tableNumber}
+                  style={{
+                    width: '44vw',
+                    ...(isLightTheme ? { backgroundColor: 'rgba(255,255,255,0.85)', borderRadius: '16px', padding: '8px', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' } : {}),
+                  }}
+                >
                   <CanvasTableCard
                     tableNumber={tableNumber}
                     price={price}

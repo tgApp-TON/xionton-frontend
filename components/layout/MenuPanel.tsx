@@ -70,11 +70,12 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
     >
       <button
         type="button"
-        onClick={onClose}
+        onClick={() => onClose()}
         style={{
-          position: 'absolute',
+          position: 'fixed',
           top: '16px',
           right: '16px',
+          zIndex: 9999999,
           width: '48px',
           height: '48px',
           borderRadius: '50%',
@@ -91,19 +92,15 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
 
       <div style={{ position: 'relative', zIndex: 999999, padding: '80px 24px 24px' }}>
         {/* Section 1 - Wallet */}
-        <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '0 0 8px 0' }}>Wallet</p>
+        <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: '0 0 4px 0' }}>Wallet</p>
         {tonAddress ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-            <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem' }}>
-              {tonAddress.slice(0, 6)}...{tonAddress.slice(-4)}
-            </span>
-            <TonConnectButton />
-          </div>
-        ) : (
-          <div style={{ marginBottom: '16px' }}>
-            <TonConnectButton />
-          </div>
-        )}
+          <p style={{ color: '#888888', fontSize: '0.75rem', margin: '0 0 8px 0', wordBreak: 'break-all' }}>
+            {tonAddress}
+          </p>
+        ) : null}
+        <div style={{ marginBottom: '16px' }}>
+          <TonConnectButton />
+        </div>
 
         <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '16px 0' }} />
 
