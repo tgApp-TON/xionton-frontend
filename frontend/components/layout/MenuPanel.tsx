@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
-import { TonConnectButton, useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
+import { useTonAddress, useTonConnectUI } from '@tonconnect/ui-react';
 
 interface MenuPanelProps {
   isOpen: boolean;
@@ -55,6 +55,16 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
   const goTo = (path: string) => {
     onClose();
     router.push(path);
+  };
+
+  const handleWalletAction = async () => {
+    if (!tonConnectUI) return;
+    if (tonAddress) {
+      await tonConnectUI.disconnect();
+      setTimeout(() => tonConnectUI.openModal(), 500);
+    } else {
+      tonConnectUI.openModal();
+    }
   };
 
   return (
@@ -224,7 +234,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
             </p>
             <button
               type="button"
-              onClick={() => tonConnectUI?.openModal?.()}
+              onClick={handleWalletAction}
               style={{
                 background: 'linear-gradient(135deg, #a855f7, #7c3aed)',
                 color: 'white',
@@ -235,14 +245,10 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
                 width: '100%',
                 border: 'none',
                 cursor: 'pointer',
-                marginBottom: '16px',
               }}
             >
               🔄 Switch / Connect Wallet
             </button>
-            <div>
-              <TonConnectButton />
-            </div>
           </div>
         </div>
       )}
