@@ -16,6 +16,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
   const hasInitialWalletRun = useRef(false);
   const [stats, setStats] = useState<{ nickname: string; activeTables: number; totalCycles: number } | null>(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [showFullAddress, setShowFullAddress] = useState(false);
 
   useEffect(() => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('matrix_ton_user_id') : null;
@@ -208,8 +209,24 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
             {tonAddress ? (
               <>
                 <p style={{ color: '#aaaaaa', fontSize: '0.9rem', marginBottom: '8px' }}>Current wallet:</p>
-                <p style={{ color: '#ffffff', fontSize: '0.85rem', wordBreak: 'break-all', marginBottom: '12px', lineHeight: 1.5 }}>
-                  {tonAddress}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setShowFullAddress(!showFullAddress)}
+                  onKeyDown={(e) => e.key === 'Enter' && setShowFullAddress(!showFullAddress)}
+                  style={{
+                    color: showFullAddress ? '#ffffff' : '#a855f7',
+                    fontSize: '0.85rem',
+                    wordBreak: showFullAddress ? 'break-all' : undefined,
+                    marginBottom: '4px',
+                    lineHeight: 1.5,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {showFullAddress ? tonAddress : `${tonAddress.slice(0, 6)}...${tonAddress.slice(-4)}`}
+                </div>
+                <p style={{ color: '#888888', fontSize: '0.75rem', marginBottom: '20px' }}>
+                  {showFullAddress ? 'Tap to hide' : 'Tap to see full address'}
                 </p>
                 <p style={{ color: '#888888', fontSize: '0.8rem', marginBottom: '20px' }}>
                   Tap the button below to switch or disconnect wallet
