@@ -44,6 +44,7 @@ export async function GET(request: NextRequest) {
       .eq('userId', id)
       .single();
     console.log('[stats] UserStats raw response', { data: userStats, error: userStatsError });
+    console.log('[stats] Row returned for userId', id, ':', userStats ? { userId: id, totalEarned: userStats.totalEarned } : 'none');
     let totalEarned = 0;
     if (userStatsError || userStats == null) {
       totalEarned = 0;

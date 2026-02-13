@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
       .eq('userId', id)
       .single();
     console.log('[referrals] UserStats raw response', { data: myStats, error: myStatsError });
+    console.log('[referrals] Row returned for userId', id, '(myTotalEarned):', myStats ? { userId: id, totalEarned: myStats.totalEarned } : 'none');
     let myTotalEarned = 0;
     if (myStatsError || myStats == null) {
       myTotalEarned = 0;
