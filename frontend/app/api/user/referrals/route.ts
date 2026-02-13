@@ -14,13 +14,39 @@ export async function GET(request: NextRequest) {
   try {
     const { data: currentUser, error: userError } = await supabase
       .from('User')
-      .select('referralCode')
+      .select('referralCode, referrerId')
       .eq('id', id)
       .single();
     if (userError || !currentUser) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
     const referralCode = currentUser.referralCode ?? '';
+    const referrerId = currentUser.referrerId ?? null;
+
+    let sponsor: { nickname: string; activeTables: number; referralsCount: number } | null = null;
+    if (referrerId != null && referrerId !== 1) {
+      const { data: sponsorUser } = await supabase
+        .from('User')
+        .select('id, nickname')
+        .eq('id', referrerId)
+        .single();
+      if (sponsorUser) {
+        const { data: sponsorTables } = await supabase
+          .from('Table')
+          .select('id')
+          .eq('userId', referrerId)
+          .eq('status', 'ACTIVE');
+        const { count: sponsorRefCount } = await supabase
+          .from('User')
+          .select('id', { count: 'exact', head: true })
+          .eq('referrerId', referrerId);
+        sponsor = {
+          nickname: sponsorUser.nickname ?? '',
+          activeTables: sponsorTables?.length ?? 0,
+          referralsCount: sponsorRefCount ?? 0,
+        };
+      }
+    }
 
     const { data: referralUsers, error: refError } = await supabase
       .from('User')
@@ -31,37 +57,64 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: refError.message }, { status: 500 });
     }
     const list = referralUsers || [];
-
     const referralIds = list.map((u: { id: number }) => u.id);
+
     let activeCountByUser: Record<number, number> = {};
+    let referralsCountByUser: Record<number, number> = {};
+    let totalEarnedByUser: Record<number, number> = {};
+
     if (referralIds.length > 0) {
       const { data: tables } = await supabase
         .from('Table')
         .select('userId')
         .in('userId', referralIds)
         .eq('status', 'ACTIVE');
-      const countByUser: Record<number, number> = {};
-      referralIds.forEach((uid: number) => (countByUser[uid] = 0));
+      referralIds.forEach((uid: number) => (activeCountByUser[uid] = 0));
       (tables || []).forEach((t: { userId: number }) => {
-        countByUser[t.userId] = (countByUser[t.userId] ?? 0) + 1;
+        activeCountByUser[t.userId] = (activeCountByUser[t.userId] ?? 0) + 1;
       });
-      activeCountByUser = countByUser;
+
+      for (const rid of referralIds) {
+        const { count } = await supabase
+          .from('User')
+          .select('id', { count: 'exact', head: true })
+          .eq('referrerId', rid);
+        referralsCountByUser[rid] = count ?? 0;
+      }
+
+      const { data: userStatsRows } = await supabase
+        .from('UserStats')
+        .select('userId, totalEarned')
+        .in('userId', referralIds);
+      (userStatsRows || []).forEach((row: { userId: number; totalEarned: number | string }) => {
+        const n = typeof row.totalEarned === 'string' ? parseFloat(row.totalEarned) : Number(row.totalEarned);
+        totalEarnedByUser[row.userId] = Number.isNaN(n) ? 0 : n;
+      });
+      referralIds.forEach((uid: number) => {
+        if (totalEarnedByUser[uid] === undefined) totalEarnedByUser[uid] = 0;
+      });
     }
 
     const referrals = list.map((u: { id: number; nickname: string; registeredAt: string }) => ({
       id: u.id,
       nickname: u.nickname,
       activeTables: activeCountByUser[u.id] ?? 0,
+      referralsCount: referralsCountByUser[u.id] ?? 0,
+      totalEarned: totalEarnedByUser[u.id] ?? 0,
       createdAt: u.registeredAt,
     }));
+
     const totalReferrals = referrals.length;
-    const activeReferrals = referrals.filter((r: { activeTables: number }) => r.activeTables >= 1).length;
+    const workers = referrals.filter((r: { activeTables: number }) => r.activeTables >= 1).length;
+    const loosers = referrals.filter((r: { activeTables: number }) => r.activeTables === 0).length;
 
     return NextResponse.json({
       referralCode,
+      sponsor,
       referrals,
       totalReferrals,
-      activeReferrals,
+      workers,
+      loosers,
     });
   } catch (error: unknown) {
     return NextResponse.json(

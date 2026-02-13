@@ -1,10 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Copy, Share2 } from 'lucide-react';
 
 const BOT_LINK = 'https://t.me/MatrixTONTON_Bot';
+
+type FilterTab = 'all' | 'workers' | 'loosers';
+
+type ReferralItem = {
+  id: number;
+  nickname: string;
+  activeTables: number;
+  referralsCount: number;
+  totalEarned: number;
+  createdAt: string;
+};
 
 export default function ReferralsPage() {
   const router = useRouter();
@@ -12,11 +23,14 @@ export default function ReferralsPage() {
   const [userId, setUserId] = useState<string | null>(null);
   const [data, setData] = useState<{
     referralCode: string;
-    referrals: { id: number; nickname: string; activeTables: number; createdAt: string }[];
+    sponsor: { nickname: string; activeTables: number; referralsCount: number } | null;
+    referrals: ReferralItem[];
     totalReferrals: number;
-    activeReferrals: number;
+    workers: number;
+    loosers: number;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<FilterTab>('all');
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -44,6 +58,13 @@ export default function ReferralsPage() {
   }, []);
 
   const referralLink = data?.referralCode ? `${BOT_LINK}?start=${encodeURIComponent(data.referralCode)}` : '';
+
+  const filteredReferrals = useMemo(() => {
+    if (!data?.referrals) return [];
+    if (activeFilter === 'workers') return data.referrals.filter((r) => r.activeTables >= 1);
+    if (activeFilter === 'loosers') return data.referrals.filter((r) => r.activeTables === 0);
+    return data.referrals;
+  }, [data?.referrals, activeFilter]);
 
   const handleCopy = () => {
     if (!referralLink) return;
@@ -74,6 +95,33 @@ export default function ReferralsPage() {
       return s;
     }
   };
+
+  const sectionHeader = {
+    color: '#a855f7',
+    fontSize: '0.75rem',
+    fontWeight: 700,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.1em',
+    marginBottom: '8px',
+  };
+
+  const statBox = (label: string, value: number | string, valueColor: string) => (
+    <div
+      key={label}
+      style={{
+        flex: 1,
+        minWidth: 0,
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '12px',
+        padding: '12px',
+        textAlign: 'center',
+      }}
+    >
+      <div style={{ color: valueColor, fontWeight: 700, fontSize: '1.25rem', marginBottom: '4px' }}>{value}</div>
+      <div style={{ color: '#888888', fontSize: '0.8rem' }}>{label}</div>
+    </div>
+  );
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative' }}>
@@ -111,19 +159,30 @@ export default function ReferralsPage() {
           <p style={{ color: '#888' }}>Loading...</p>
         ) : (
           <>
+            {/* Section 0 - Your Sponsor */}
+            {data?.sponsor != null && (
+              <>
+                <p style={{ ...sectionHeader, marginTop: 0 }}>Your Sponsor</p>
+                <div
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(168,85,247,0.3)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '24px',
+                  }}
+                >
+                  <div style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', marginBottom: '8px' }}>
+                    {data.sponsor.nickname}
+                  </div>
+                  <div style={{ color: '#888888', fontSize: '0.85rem' }}>Active Tables: {data.sponsor.activeTables}</div>
+                  <div style={{ color: '#888888', fontSize: '0.85rem' }}>Referrals: {data.sponsor.referralsCount}</div>
+                </div>
+              </>
+            )}
+
             {/* Section 1 - Your Referral Link */}
-            <p
-              style={{
-                color: '#a855f7',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                marginBottom: '8px',
-              }}
-            >
-              Your Referral Link
-            </p>
+            <p style={{ ...sectionHeader }}>Your Referral Link</p>
             <div
               style={{
                 background: 'rgba(168,85,247,0.1)',
@@ -190,66 +249,70 @@ export default function ReferralsPage() {
               </div>
             </div>
 
-            {/* Section 2 - Stats */}
-            <p
-              style={{
-                color: '#a855f7',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                marginBottom: '8px',
-                marginTop: '24px',
-              }}
-            >
-              Referral Stats
-            </p>
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-                <span style={{ color: '#888888', fontSize: '0.85rem' }}>Total Referrals</span>
-                <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{data?.totalReferrals ?? '—'}</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-                <span style={{ color: '#888888', fontSize: '0.85rem' }}>Active Referrals</span>
-                <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{data?.activeReferrals ?? '—'}</span>
-              </div>
+            {/* Section 2 - Referral Stats (3 boxes) */}
+            <p style={{ ...sectionHeader, marginTop: '24px' }}>Referral Stats</p>
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
+              {statBox('Total', data?.totalReferrals ?? '—', '#ffffff')}
+              {statBox('Workers', data?.workers ?? '—', '#22c55e')}
+              {statBox('Loosers', data?.loosers ?? '—', '#ef4444')}
             </div>
 
-            {/* Section 3 - Referrals List */}
-            <p
-              style={{
-                color: '#a855f7',
-                fontSize: '0.75rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                marginBottom: '8px',
-                marginTop: '24px',
-              }}
-            >
-              Your Referrals
-            </p>
-            {!data?.referrals?.length ? (
+            {/* Section 3 - Filter tabs */}
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+              {(['all', 'workers', 'loosers'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveFilter(tab)}
+                  style={{
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(168,85,247,0.4)',
+                    background: activeFilter === tab ? 'rgba(168,85,247,0.4)' : 'transparent',
+                    color: activeFilter === tab ? '#ffffff' : '#888888',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {tab === 'all' ? 'All' : tab === 'workers' ? 'Workers' : 'Loosers'}
+                </button>
+              ))}
+            </div>
+
+            {/* Section 4 - Referrals list (filtered) */}
+            <p style={{ ...sectionHeader, marginTop: '24px' }}>Your Referrals</p>
+            {filteredReferrals.length === 0 ? (
               <p style={{ color: '#888888', fontSize: '0.9rem', marginTop: '8px' }}>
-                No referrals yet. Share your link to invite friends!
+                {activeFilter === 'workers' && 'No workers yet.'}
+                {activeFilter === 'loosers' && 'No loosers.'}
+                {activeFilter === 'all' && 'No referrals yet. Share your link to invite friends!'}
               </p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
-                {data.referrals.map((r) => (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                {filteredReferrals.map((r) => (
                   <div
                     key={r.id}
                     style={{
                       background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
                       borderRadius: '12px',
-                      padding: '14px 16px',
+                      padding: '16px',
+                      border: '1px solid rgba(255,255,255,0.08)',
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                      <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{r.nickname}</span>
-                      <span style={{ color: '#a855f7', fontSize: '0.85rem' }}>{r.activeTables} active table{r.activeTables !== 1 ? 's' : ''}</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem' }}>{r.nickname}</span>
+                      <span style={{ color: '#888888', fontSize: '0.8rem' }}>{formatDate(r.createdAt)}</span>
                     </div>
-                    <div style={{ color: '#888888', fontSize: '0.8rem' }}>Joined {formatDate(r.createdAt)}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '6px' }}>
+                      <span style={{ color: r.activeTables > 0 ? '#22c55e' : '#ef4444', fontSize: '0.85rem' }}>
+                        Tables: {r.activeTables}
+                      </span>
+                      <span style={{ color: '#888888', fontSize: '0.85rem' }}>Refs: {r.referralsCount}</span>
+                    </div>
+                    <div style={{ color: '#a855f7', fontSize: '0.9rem', fontWeight: 600 }}>
+                      Earned: {Number(r.totalEarned).toFixed(2)} TON
+                    </div>
                   </div>
                 ))}
               </div>
