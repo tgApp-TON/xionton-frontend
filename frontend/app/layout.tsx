@@ -27,6 +27,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+  (function() {
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+    script.onload = function() { eruda.init(); };
+    document.head.appendChild(script);
+  })();
+`,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <AnimatedBackground />
         <div className="stars-bg" />
