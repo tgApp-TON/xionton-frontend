@@ -58,6 +58,32 @@ export function RegisterClient() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem('matrix_ton_grayscale');
+    const grayscale = saved === 'true' || saved === '1';
+    document.documentElement.style.filter = grayscale ? 'grayscale(100%)' : '';
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let refCode: string | null = null;
+    const tg = (window as any)?.Telegram?.WebApp;
+    if (tg?.initDataUnsafe?.start_param) refCode = tg.initDataUnsafe.start_param;
+    if (!refCode && typeof window !== 'undefined') {
+      const hash = window.location.hash.slice(1);
+      if (hash) {
+        const params = new URLSearchParams(hash);
+        refCode = params.get('tgWebAppStartParam') || params.get('start_param') || null;
+      }
+    }
+    if (!refCode && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      refCode = params.get('ref') || null;
+    }
+    if (refCode) localStorage.setItem('matrix_ton_referral_code', refCode);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
     if (localStorage.getItem('matrix_ton_user_id')) {
       router.replace('/tables');
       return;
@@ -124,6 +150,8 @@ export function RegisterClient() {
     }
 
     const walletToSend = tonAddress || '';
+    const referralCodeToSend =
+      (typeof window !== 'undefined' ? localStorage.getItem('matrix_ton_referral_code') : null) || 'MASTER';
 
     try {
       const res = await fetch('/api/auth/register', {
@@ -135,7 +163,7 @@ export function RegisterClient() {
           isPremium: true,
           nickname,
           tonWallet: walletToSend,
-          referralCode: 'MASTER',
+          referralCode: referralCodeToSend,
         }),
       });
 
