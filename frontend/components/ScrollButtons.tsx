@@ -90,11 +90,13 @@ export function ScrollButtons() {
           <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', zIndex: 99998 }} onClick={() => setIsMenuOpen(false)} />
           <div style={{
             position: 'fixed', top: 0, right: 0, height: '100%', width: '100%',
-            zIndex: 99999, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+            zIndex: 9999, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
             overflowY: 'auto', color: '#ffffff', paddingTop: '120px', lineHeight: '1.8'
           }} className="p-6 menu-text">
-            <AnimatedBackground />
-            <div className="flex flex-col h-full relative z-10" style={{ paddingTop: '80px' }}>
+            <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+              <AnimatedBackground />
+            </div>
+            <div className="flex flex-col h-full relative" style={{ paddingTop: '80px', zIndex: 10000 }}>
               <button
                 onClick={() => setIsMenuOpen(false)}
                 style={{
