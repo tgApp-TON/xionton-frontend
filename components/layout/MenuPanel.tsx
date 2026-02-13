@@ -14,7 +14,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
   const router = useRouter();
   const tonAddress = useTonAddress();
   const hasInitialWalletRun = useRef(false);
-  const [stats, setStats] = useState<{ nickname: string; activeTables: number; totalCycles: number } | null>(null);
+  const [stats, setStats] = useState<{ nickname: string; activeTables: number; totalCycles: number; totalEarned?: number } | null>(null);
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [showFullAddress, setShowFullAddress] = useState(false);
 
@@ -138,6 +138,10 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
             <span style={{ color: '#888888', fontSize: '0.85rem' }}>Total Cycles</span>
             <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{stats?.totalCycles ?? '—'}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
+            <span style={{ color: '#888888', fontSize: '0.85rem' }}>Total Earned</span>
+            <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '1rem' }}>{stats?.totalEarned != null ? `${Number(stats.totalEarned).toFixed(2)} TON` : '—'}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
             <span style={{ color: '#888888', fontSize: '0.85rem' }}>Nickname</span>

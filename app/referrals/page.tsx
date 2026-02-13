@@ -27,6 +27,7 @@ export default function ReferralsPage() {
   const [data, setData] = useState<{
     referralCode: string;
     currentUserNickname?: string;
+    myTotalEarned?: number;
     sponsor: { nickname: string; activeTables: number; referralsCount: number } | null;
     referrals: ReferralItem[];
     totalReferrals: number;
@@ -202,6 +203,34 @@ export default function ReferralsPage() {
           <p style={{ color: '#888' }}>Loading...</p>
         ) : (
           <>
+            {/* Your Earnings card - top */}
+            <div
+              style={{
+                background: 'rgba(34,197,94,0.1)',
+                border: '1px solid rgba(34,197,94,0.3)',
+                borderRadius: '16px',
+                padding: '20px',
+                marginBottom: '24px',
+              }}
+            >
+              <p
+                style={{
+                  color: '#22c55e',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  marginBottom: '8px',
+                }}
+              >
+                Your earnings
+              </p>
+              <div style={{ color: '#ffffff', fontSize: '2rem', fontWeight: 700, marginBottom: '4px' }}>
+                {(data?.myTotalEarned ?? 0).toFixed(2)} TON
+              </div>
+              <p style={{ color: '#888888', fontSize: '0.8rem', margin: 0 }}>Total earned from all tables</p>
+            </div>
+
             {/* Section 0 - Your Sponsor */}
             {data?.sponsor != null && (
               <>
@@ -436,14 +465,23 @@ export default function ReferralsPage() {
                       <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem' }}>{r.nickname}</span>
                       <span style={{ color: '#888888', fontSize: '0.8rem' }}>{formatDate(r.createdAt)}</span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '8px' }}>
                       <span style={{ color: r.activeTables > 0 ? '#22c55e' : '#ef4444', fontSize: '0.85rem' }}>
                         Tables: {r.activeTables}
                       </span>
                       <span style={{ color: '#888888', fontSize: '0.85rem' }}>Refs: {r.referralsCount}</span>
                     </div>
-                    <div style={{ color: '#a855f7', fontSize: '0.9rem', fontWeight: 600 }}>
-                      Earned: {Number(r.totalEarned).toFixed(2)} TON
+                    <div
+                      style={{
+                        background: 'rgba(34,197,94,0.05)',
+                        borderRadius: '8px',
+                        padding: '8px',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      <span style={{ color: '#22c55e', fontSize: '1rem', fontWeight: 700 }}>
+                        💰 {Number(r.totalEarned).toFixed(2)} TON earned
+                      </span>
                     </div>
                     {tableProgressForReferral(r.tables ?? [])}
                   </div>

@@ -35,10 +35,22 @@ export async function GET(request: NextRequest) {
     const activeTables = (tables || []).filter((t) => t.status === 'ACTIVE').length;
     const totalCycles = (tables || []).reduce((sum, t) => sum + (t.cycleNumber ?? 0), 0);
 
+    let totalEarned = 0;
+    const { data: userStats } = await supabase
+      .from('UserStats')
+      .select('totalEarned')
+      .eq('userId', id)
+      .single();
+    if (userStats?.totalEarned != null) {
+      const n = typeof userStats.totalEarned === 'string' ? parseFloat(userStats.totalEarned) : Number(userStats.totalEarned);
+      totalEarned = Number.isNaN(n) ? 0 : n;
+    }
+
     return NextResponse.json({
       nickname: user.nickname ?? '',
       activeTables,
       totalCycles,
+      totalEarned,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Failed to fetch stats' }, { status: 500 });

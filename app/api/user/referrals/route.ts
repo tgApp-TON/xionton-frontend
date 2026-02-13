@@ -24,6 +24,17 @@ export async function GET(request: NextRequest) {
     const referrerId = currentUser.referrerId ?? null;
     const currentUserNickname = currentUser.nickname ?? 'You';
 
+    let myTotalEarned = 0;
+    const { data: myStats } = await supabase
+      .from('UserStats')
+      .select('totalEarned')
+      .eq('userId', id)
+      .single();
+    if (myStats?.totalEarned != null) {
+      const n = typeof myStats.totalEarned === 'string' ? parseFloat(myStats.totalEarned) : Number(myStats.totalEarned);
+      myTotalEarned = Number.isNaN(n) ? 0 : n;
+    }
+
     let sponsor: { nickname: string; activeTables: number; referralsCount: number } | null = null;
     if (referrerId != null && referrerId !== 1) {
       const { data: sponsorUser } = await supabase
@@ -126,6 +137,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       referralCode,
       currentUserNickname,
+      myTotalEarned,
       sponsor,
       referrals,
       totalReferrals,
