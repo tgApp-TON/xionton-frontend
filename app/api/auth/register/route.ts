@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { engineRegisterUser } from '@/lib/matrix-engine';
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,7 +93,49 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, user });
+    const newUser = user as { id: number; [key: string]: unknown };
+    const sponsorId = referrerId;
+
+    // Set starting wallet balance for testing (engine will deduct table 1 price)
+    await supabase
+      .from('User')
+      .update({ walletBalance: 50000 })
+      .eq('id', newUser.id);
+
+    let matrixSuccess = false;
+    try {
+      await engineRegisterUser(newUser.id, sponsorId, supabase);
+      matrixSuccess = true;
+    } catch (engineErr) {
+      console.error('[register] matrix engine error:', engineErr);
+    }
+
+    // Ensure UserStats exists for new user
+    if (matrixSuccess) {
+      await supabase.from('UserStats').upsert(
+        {
+          userId: newUser.id,
+          totalEarned: 0,
+          totalReferrals: 0,
+          totalCycles: 0,
+          activeTables: 1,
+          updatedAt: new Date().toISOString(),
+        },
+        { onConflict: 'userId' }
+      );
+    }
+
+    const { data: userWithBalance } = await supabase
+      .from('User')
+      .select('*')
+      .eq('id', newUser.id)
+      .single();
+
+    return NextResponse.json({
+      success: true,
+      user: userWithBalance ?? user,
+      warning: matrixSuccess ? undefined : 'User created but matrix setup failed. You can buy table 1 manually.',
+    });
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json({ error: 'Registration failed' }, { status: 500 });
