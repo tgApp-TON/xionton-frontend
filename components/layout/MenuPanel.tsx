@@ -99,7 +99,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
           border-radius: 8px;
         }
       `}</style>
-      <div style={{ position: 'relative', zIndex: 999999, padding: '80px 24px 24px' }}>
+      <div style={{ position: 'relative', zIndex: 999999, padding: 'calc(60px + env(safe-area-inset-top, 0px)) 24px 24px' }}>
         {/* Section 1 - Wallet (clickable) */}
         <p style={{ color: '#a855f7', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
           Wallet

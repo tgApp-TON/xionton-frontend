@@ -51,6 +51,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
 
       tg.ready();
       tg.expand();
+      if (typeof tg.lockOrientation === 'function') tg.lockOrientation();
+      if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
       tg.enableClosingConfirmation();
       if (typeof tg.requestFullscreen === 'function') {
         tg.requestFullscreen();
