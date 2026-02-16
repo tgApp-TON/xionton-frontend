@@ -75,7 +75,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
         onClick={() => onClose()}
         style={{
           position: 'fixed',
-          top: 'calc(16px + env(safe-area-inset-top, 0px))',
+          top: 'calc(24px + env(safe-area-inset-top, 0px))',
           right: '16px',
           zIndex: 9999999,
           width: '48px',
@@ -215,7 +215,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
             onClick={() => setIsWalletModalOpen(false)}
             style={{
               position: 'fixed',
-              top: 'calc(16px + env(safe-area-inset-top, 0px))',
+              top: 'calc(24px + env(safe-area-inset-top, 0px))',
               right: '16px',
               width: '48px',
               height: '48px',

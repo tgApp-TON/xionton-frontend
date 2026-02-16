@@ -200,7 +200,7 @@ export default function TablesPage() {
             onClick={toggleGrayscale}
             style={{
               position: 'fixed',
-              top: 'calc(12px + env(safe-area-inset-top, 0px))',
+              top: 'calc(20px + env(safe-area-inset-top, 0px))',
               left: '12px',
               zIndex: 99999,
               width: '56px',
@@ -225,7 +225,7 @@ export default function TablesPage() {
             onClick={() => setIsMenuOpen(true)}
             style={{
               position: 'fixed',
-              top: 'calc(12px + env(safe-area-inset-top, 0px))',
+              top: 'calc(20px + env(safe-area-inset-top, 0px))',
               right: '12px',
               zIndex: 99999,
               width: '56px',
@@ -254,6 +254,7 @@ export default function TablesPage() {
         style={{
           paddingTop: '70px',
           minHeight: '100vh',
+          paddingBottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
         }}
       >
         <div
