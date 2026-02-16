@@ -586,9 +586,33 @@ export function CanvasTableCard({
     };
   }, [tableNumber, price, cycles, slots, isActive, isUnlocked, onBuy, onClick]);
 
+  const statusBuy = isUnlocked && !isActive;
+
   return (
-    <div ref={containerRef} className="w-full" style={{ margin: 0, padding: 0 }}>
-      <canvas ref={canvasRef} className="w-full h-auto" style={{ cursor: isUnlocked && !isActive ? 'pointer' : 'default' }} />
+    <div
+      ref={containerRef}
+      className="w-full"
+      style={{ margin: 0, padding: 0, position: 'relative', cursor: statusBuy ? 'pointer' : 'default' }}
+    >
+      <canvas ref={canvasRef} className="w-full h-auto" style={{ display: 'block', pointerEvents: statusBuy ? 'none' : 'auto' }} />
+      {statusBuy && (
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Buy table"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'transparent',
+            zIndex: 10,
+            cursor: 'pointer',
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            (onClick ?? onBuy)?.();
+          }}
+        />
+      )}
     </div>
   );
 }
