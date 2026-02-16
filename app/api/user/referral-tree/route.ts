@@ -28,8 +28,6 @@ function num(val: unknown): number {
 }
 
 async function getUserNode(uid: number): Promise<TreeUser | null> {
-  if (isMaster(uid)) return null;
-
   const { data: user } = await supabase
     .from('User')
     .select('id, nickname, totalEarned')
@@ -107,14 +105,23 @@ async function buildTree(uid: number, depth: number, isMasterUser: boolean): Pro
 }
 
 export async function GET(request: NextRequest) {
-  const userId = request.nextUrl.searchParams.get('userId');
-  if (!userId) {
+  const userIdParam = request.nextUrl.searchParams.get('userId');
+  console.log('[referral-tree] userId param:', userIdParam);
+
+  if (!userIdParam) {
     return NextResponse.json({ error: 'userId required' }, { status: 400 });
   }
-  const id = parseInt(userId, 10);
+  const id = parseInt(userIdParam, 10);
   if (Number.isNaN(id) || id < 1) {
     return NextResponse.json({ error: 'Invalid userId' }, { status: 400 });
   }
+
+  const { data: user, error: userError } = await supabase
+    .from('User')
+    .select('id, nickname, totalEarned, referrerId')
+    .eq('id', id)
+    .single();
+  console.log('[referral-tree] user fetch result:', user, userError);
 
   try {
     const isMasterUser = id === 1;

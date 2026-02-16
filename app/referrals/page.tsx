@@ -3,7 +3,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Copy, Share2 } from 'lucide-react';
-import { ReferralTree } from '@/components/referrals/ReferralTree';
 
 const BOT_LINK = 'https://t.me/MatrixTONTON_Bot';
 
@@ -330,6 +329,26 @@ export default function ReferralsPage() {
               {statBox('Loosers', data?.loosers ?? '—', '#ef4444')}
             </div>
 
+            <button
+              type="button"
+              onClick={() => router.push('/referral-tree')}
+              style={{
+                width: '100%',
+                border: '1px solid rgba(168,85,247,0.4)',
+                background: 'rgba(168,85,247,0.1)',
+                color: '#a855f7',
+                borderRadius: 12,
+                padding: 14,
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                textAlign: 'center',
+                cursor: 'pointer',
+                marginBottom: '24px',
+              }}
+            >
+              VIEW REFERRAL TREE →
+            </button>
+
             {/* Section 3 - Filter tabs */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
               {(['all', 'workers', 'loosers'] as const).map((tab) => (
@@ -352,10 +371,6 @@ export default function ReferralsPage() {
                 </button>
               ))}
             </div>
-
-            {/* Referral Tree */}
-            <p style={{ ...sectionHeader, marginTop: '24px' }}>Referral Tree</p>
-            {userId && <ReferralTree userId={userId} />}
 
             {/* Section 4 - Referrals list (filtered) */}
             <p style={{ ...sectionHeader, marginTop: '24px' }}>Your Referrals</p>
