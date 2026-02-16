@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Copy, Share2 } from 'lucide-react';
+import { ReferralTree } from '@/components/referrals/ReferralTree';
 
 const BOT_LINK = 'https://t.me/MatrixTONTON_Bot';
 
@@ -351,6 +352,10 @@ export default function ReferralsPage() {
                 </button>
               ))}
             </div>
+
+            {/* Referral Tree */}
+            <p style={{ ...sectionHeader, marginTop: '24px' }}>Referral Tree</p>
+            {userId && <ReferralTree userId={userId} />}
 
             {/* Section 4 - Referrals list (filtered) */}
             <p style={{ ...sectionHeader, marginTop: '24px' }}>Your Referrals</p>
