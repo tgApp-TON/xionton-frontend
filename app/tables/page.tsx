@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sun, Moon } from 'lucide-react';
 import { CanvasTableCard } from '@/components/tables/CanvasTableCard';
+import { TableDetailModal } from '@/components/tables/TableDetailModal';
 import { MenuPanel } from '@/components/layout/MenuPanel';
 import { TABLE_PRICES } from '@/lib/types';
 
@@ -21,6 +22,7 @@ export default function TablesPage() {
   const [buyingTable, setBuyingTable] = useState<number | null>(null);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
   const [confirmModal, setConfirmModal] = useState<{ tableNumber: number; price: number } | null>(null);
+  const [tableDetailModal, setTableDetailModal] = useState<{ tableNumber: number } | null>(null);
 
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -326,7 +328,7 @@ export default function TablesPage() {
                     slots={slots}
                     isActive={isActive}
                     isUnlocked={isUnlocked}
-                    onClick={statusBuy ? () => setConfirmModal({ tableNumber, price }) : undefined}
+                    onClick={isActive ? () => setTableDetailModal({ tableNumber }) : statusBuy ? () => setConfirmModal({ tableNumber, price }) : undefined}
                     onBuy={statusBuy ? () => setConfirmModal({ tableNumber, price }) : undefined}
                   />
                   {isActive && (
@@ -353,6 +355,13 @@ export default function TablesPage() {
         </div>
       </div>
       <MenuPanel isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      {tableDetailModal && userId && (
+        <TableDetailModal
+          tableNumber={tableDetailModal.tableNumber}
+          userId={userId}
+          onClose={() => setTableDetailModal(null)}
+        />
+      )}
       {confirmModal && (
         <div
           style={{
