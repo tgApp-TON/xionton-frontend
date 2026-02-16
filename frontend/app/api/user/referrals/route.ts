@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
+const isMaster = (id: number) => id === 1;
+
 export async function GET(request: NextRequest) {
   const userId = request.nextUrl.searchParams.get('userId');
   if (!userId) {
@@ -24,34 +26,20 @@ export async function GET(request: NextRequest) {
     const referrerId = currentUser.referrerId ?? null;
     const currentUserNickname = currentUser.nickname ?? 'You';
 
-    // myTotalEarned: from UserStats for current user only; no row or invalid -> 0
-    const myStatsQuery = { from: 'UserStats', select: 'totalEarned', where: { userId: id } };
-    console.log('[referrals] UserStats (myTotalEarned) query', myStatsQuery);
-    const { data: myStats, error: myStatsError } = await supabase
-      .from('UserStats')
-      .select('totalEarned')
-      .eq('userId', id)
-      .single();
-    console.log('[referrals] UserStats raw response', { data: myStats, error: myStatsError });
-    console.log('[referrals] Row returned for userId', id, '(myTotalEarned):', myStats ? { userId: id, totalEarned: myStats.totalEarned } : 'none');
-    let myTotalEarned = 0;
-    if (myStatsError || myStats == null) {
-      myTotalEarned = 0;
-    } else if (myStats.totalEarned == null || myStats.totalEarned === undefined) {
-      myTotalEarned = 0;
-    } else {
-      const n = typeof myStats.totalEarned === 'string' ? parseFloat(myStats.totalEarned) : Number(myStats.totalEarned);
-      myTotalEarned = Number.isNaN(n) || n < 0 ? 0 : n;
-    }
+    const { data: myPayouts } = await supabase
+      .from('PayoutLog')
+      .select('amount')
+      .eq('toUserId', id);
+    const myTotalEarned = Math.round((myPayouts ?? []).reduce((sum: number, p: any) => sum + Number(p.amount ?? 0), 0) * 100) / 100;
 
     let sponsor: { nickname: string; activeTables: number; referralsCount: number } | null = null;
-    if (referrerId != null && referrerId !== 1) {
+    if (referrerId != null && !isMaster(referrerId)) {
       const { data: sponsorUser } = await supabase
         .from('User')
         .select('id, nickname')
         .eq('id', referrerId)
         .single();
-      if (sponsorUser) {
+      if (sponsorUser && !isMaster((sponsorUser as any).id)) {
         const { data: sponsorTables } = await supabase
           .from('Table')
           .select('id')
@@ -77,7 +65,7 @@ export async function GET(request: NextRequest) {
     if (refError) {
       return NextResponse.json({ error: refError.message }, { status: 500 });
     }
-    const list = referralUsers || [];
+    const list = (referralUsers || []).filter((u: any) => !isMaster(u.id));
     const referralIds = list.map((u: { id: number }) => u.id);
 
     let activeCountByUser: Record<number, number> = {};
@@ -103,17 +91,13 @@ export async function GET(request: NextRequest) {
         referralsCountByUser[rid] = count ?? 0;
       }
 
-      const { data: userStatsRows } = await supabase
-        .from('UserStats')
-        .select('userId, totalEarned')
-        .in('userId', referralIds);
-      (userStatsRows || []).forEach((row: { userId: number; totalEarned: number | string }) => {
-        const n = typeof row.totalEarned === 'string' ? parseFloat(row.totalEarned) : Number(row.totalEarned);
-        totalEarnedByUser[row.userId] = Number.isNaN(n) || n < 0 ? 0 : n;
-      });
-      referralIds.forEach((uid: number) => {
-        if (totalEarnedByUser[uid] === undefined) totalEarnedByUser[uid] = 0;
-      });
+      for (const rid of referralIds) {
+        const { data: payouts } = await supabase
+          .from('PayoutLog')
+          .select('amount')
+          .eq('toUserId', rid);
+        totalEarnedByUser[rid] = Math.round((payouts ?? []).reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0) * 100) / 100;
+      }
     }
 
     let tablesByUser: Record<number, { tableNumber: number; status: string }[]> = {};

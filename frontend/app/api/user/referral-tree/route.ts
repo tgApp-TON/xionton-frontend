@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
 const MAX_DEPTH = 3;
+const MAX_UPLINE = 5;
+
+const isMaster = (id: number) => id === 1;
 
 type TreeUser = {
   id: number;
@@ -10,6 +13,8 @@ type TreeUser = {
   totalEarned: number;
   referralsCount: number;
 };
+
+type UplineNode = TreeUser & { level: number };
 
 type TreeNode = {
   user: TreeUser;
@@ -23,6 +28,8 @@ function num(val: unknown): number {
 }
 
 async function getUserNode(uid: number): Promise<TreeUser | null> {
+  if (isMaster(uid)) return null;
+
   const { data: user } = await supabase
     .from('User')
     .select('id, nickname, totalEarned')
@@ -51,11 +58,35 @@ async function getUserNode(uid: number): Promise<TreeUser | null> {
   };
 }
 
-async function buildTree(uid: number, depth: number, isMaster: boolean): Promise<TreeNode | null> {
+async function buildUpline(userId: number): Promise<UplineNode[]> {
+  const upline: UplineNode[] = [];
+  let currentId: number | null = userId;
+
+  for (let level = 1; level <= MAX_UPLINE; level++) {
+    const { data: user } = await supabase
+      .from('User')
+      .select('id, referrerId, nickname, totalEarned')
+      .eq('id', currentId)
+      .single();
+    if (!user) break;
+    const referrerId = (user as any).referrerId ?? null;
+    if (referrerId == null || isMaster(referrerId)) break;
+
+    const nodeData = await getUserNode(referrerId);
+    if (!nodeData) break;
+
+    upline.push({ ...nodeData, level });
+    currentId = referrerId;
+  }
+
+  return upline;
+}
+
+async function buildTree(uid: number, depth: number, isMasterUser: boolean): Promise<TreeNode | null> {
   const userData = await getUserNode(uid);
   if (!userData) return null;
 
-  const maxDepth = isMaster ? 999 : MAX_DEPTH;
+  const maxDepth = isMasterUser ? 999 : MAX_DEPTH;
   if (depth >= maxDepth) {
     return { user: userData, children: [] };
   }
@@ -64,11 +95,11 @@ async function buildTree(uid: number, depth: number, isMaster: boolean): Promise
     .from('User')
     .select('id')
     .eq('referrerId', uid);
-  const childIds = (directRefs ?? []).map((r: any) => r.id);
+  const childIds = (directRefs ?? []).map((r: any) => r.id).filter((cid: number) => !isMaster(cid));
 
   const children: TreeNode[] = [];
   for (const cid of childIds) {
-    const childNode = await buildTree(cid, depth + 1, isMaster);
+    const childNode = await buildTree(cid, depth + 1, isMasterUser);
     if (childNode) children.push(childNode);
   }
 
@@ -86,12 +117,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const isMaster = id === 1;
-    const tree = await buildTree(id, 0, isMaster);
+    const isMasterUser = id === 1;
+    const [upline, tree] = await Promise.all([buildUpline(id), buildTree(id, 0, isMasterUser)]);
+
     if (!tree) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    return NextResponse.json(tree);
+
+    return NextResponse.json({
+      upline,
+      tree,
+    });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Failed to build referral tree';
     return NextResponse.json({ error: message }, { status: 500 });

@@ -23,43 +23,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const { data: tables, error: tablesError } = await supabase
-      .from('Table')
-      .select('status, cycleNumber')
+    const { count: matrixTableCount } = await supabase
+      .from('MatrixTable')
+      .select('id', { count: 'exact', head: true })
       .eq('userId', id);
+    const activeTables = matrixTableCount ?? 0;
 
-    if (tablesError) {
-      return NextResponse.json({ error: tablesError.message }, { status: 500 });
-    }
+    const { data: matrixTables } = await supabase
+      .from('MatrixTable')
+      .select('cycleCount')
+      .eq('userId', id);
+    const totalCycles = (matrixTables ?? []).reduce((sum: number, t: any) => sum + (Number(t.cycleCount) || 0), 0);
 
-    const activeTables = (tables || []).filter((t) => t.status === 'ACTIVE').length;
-    const totalCycles = (tables || []).reduce((sum, t) => sum + (t.cycleNumber ?? 0), 0);
-
-    // UserStats: totalEarned comes from UserStats table only; if no row or invalid, return 0
-    const userStatsQuery = { from: 'UserStats', select: 'totalEarned', where: { userId: id } };
-    console.log('[stats] UserStats query', userStatsQuery);
-    const { data: userStats, error: userStatsError } = await supabase
-      .from('UserStats')
-      .select('totalEarned')
-      .eq('userId', id)
-      .single();
-    console.log('[stats] UserStats raw response', { data: userStats, error: userStatsError });
-    console.log('[stats] Row returned for userId', id, ':', userStats ? { userId: id, totalEarned: userStats.totalEarned } : 'none');
-    let totalEarned = 0;
-    if (userStatsError || userStats == null) {
-      totalEarned = 0;
-    } else if (userStats.totalEarned == null || userStats.totalEarned === undefined) {
-      totalEarned = 0;
-    } else {
-      const n = typeof userStats.totalEarned === 'string' ? parseFloat(userStats.totalEarned) : Number(userStats.totalEarned);
-      totalEarned = Number.isNaN(n) || n < 0 ? 0 : n;
-    }
+    const { data: payouts } = await supabase
+      .from('PayoutLog')
+      .select('amount')
+      .eq('toUserId', id);
+    const totalEarned = (payouts ?? []).reduce((sum: number, p: any) => sum + Number(p.amount ?? 0), 0);
 
     return NextResponse.json({
       nickname: user.nickname ?? '',
       activeTables,
       totalCycles,
-      totalEarned,
+      totalEarned: Math.round(totalEarned * 100) / 100,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Failed to fetch stats' }, { status: 500 });

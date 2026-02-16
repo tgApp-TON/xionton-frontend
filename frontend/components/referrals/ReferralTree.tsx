@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, ArrowUp } from 'lucide-react';
 
 type TreeUser = {
   id: number;
@@ -11,9 +11,16 @@ type TreeUser = {
   referralsCount: number;
 };
 
+type UplineNode = TreeUser & { level: number };
+
 type TreeNode = {
   user: TreeUser;
   children: TreeNode[];
+};
+
+type TreeResponse = {
+  upline: UplineNode[];
+  tree: TreeNode;
 };
 
 const AVATAR_SIZE: Record<number, number> = {
@@ -24,7 +31,7 @@ const AVATAR_SIZE: Record<number, number> = {
 };
 
 export function ReferralTree({ userId }: { userId: string }) {
-  const [tree, setTree] = useState<TreeNode | null>(null);
+  const [data, setData] = useState<TreeResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,19 +41,19 @@ export function ReferralTree({ userId }: { userId: string }) {
     setError(null);
     fetch(`/api/user/referral-tree?userId=${encodeURIComponent(userId)}`)
       .then((r) => r.json())
-      .then((data) => {
+      .then((res) => {
         if (cancelled) return;
-        if (data.error) {
-          setError(data.error);
-          setTree(null);
+        if (res.error) {
+          setError(res.error);
+          setData(null);
           return;
         }
-        setTree(data);
+        setData({ upline: res.upline ?? [], tree: res.tree });
       })
       .catch((e) => {
         if (!cancelled) {
           setError('Failed to load tree');
-          setTree(null);
+          setData(null);
         }
       })
       .finally(() => {
@@ -75,7 +82,7 @@ export function ReferralTree({ userId }: { userId: string }) {
     );
   }
 
-  if (error || !tree) {
+  if (error || !data) {
     return (
       <p style={{ color: '#888', fontSize: '0.9rem', padding: '16px 0' }}>
         {error ?? 'No tree data'}
@@ -83,9 +90,71 @@ export function ReferralTree({ userId }: { userId: string }) {
     );
   }
 
+  const uplineReversed = [...(data.upline || [])].reverse();
+
   return (
     <div style={{ paddingBottom: 16 }}>
-      <TreeNodeRow node={tree} level={0} isRoot defaultExpanded={true} />
+      {uplineReversed.length > 0 && (
+        <>
+          <p style={{ color: 'rgba(0,212,255,0.9)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>
+            Your Upline
+          </p>
+          <div style={{ borderLeft: '1px dashed rgba(0,212,255,0.2)', marginLeft: 20, paddingLeft: 12, marginBottom: 16 }}>
+            {uplineReversed.map((u) => (
+              <div
+                key={u.id}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  gap: 12,
+                  padding: 10,
+                  marginBottom: 8,
+                  alignItems: 'center',
+                  border: '1px solid rgba(0,212,255,0.5)',
+                  borderRadius: 12,
+                  background: 'rgba(0,0,0,0.3)',
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: '#0d0d0d',
+                    border: '2px solid rgba(0,212,255,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    color: 'rgba(0,212,255,0.9)',
+                    fontSize: '0.9rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  {u.nickname.charAt(0).toUpperCase() || '?'}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                    <span style={{ color: '#fff', fontWeight: 600, fontSize: '0.9rem' }}>
+                      {u.nickname.length > 10 ? u.nickname.slice(0, 10) + '…' : u.nickname}
+                    </span>
+                    <span style={{ fontSize: '0.7rem', color: 'rgba(0,212,255,0.8)' }}>
+                      Level +{u.level}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 12px', marginTop: 4, fontSize: '0.8rem' }}>
+                    <span style={{ color: u.activeTables > 0 ? '#22c55e' : '#888' }}>Tables: {u.activeTables}</span>
+                    <span style={{ color: '#a855f7' }}>Earned: {u.totalEarned.toFixed(2)} TON</span>
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: 2 }}>Refs: {u.referralsCount}</div>
+                </div>
+                <ArrowUp size={18} style={{ color: 'rgba(0,212,255,0.6)', flexShrink: 0 }} />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      <TreeNodeRow node={data.tree} level={0} isRoot defaultExpanded={true} />
     </div>
   );
 }
