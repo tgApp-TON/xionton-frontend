@@ -1,0 +1,14 @@
+{
+  "name": "matrix-ton-bot",
+  "version": "1.0.0",
+  "description": "Matrix TON Telegram Bot",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "dotenv": "^17.3.1",
+    "grammy": "^1.31.0"
+  }
+}
