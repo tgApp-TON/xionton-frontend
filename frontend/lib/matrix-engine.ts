@@ -258,9 +258,10 @@ export async function processSlotFill(
         .maybeSingle();
       const { data: owner } = await supabase.from('User').select('walletBalance').eq('id', ownerId).single();
       const wallet = num((owner as any)?.walletBalance);
-      if (!existingNext && wallet >= priceNext) {
+      const totalCostNext = r2(priceNext + GAS); // price + blockchain fee
+      if (!existingNext && wallet >= totalCostNext) { // проверка totalCost
         const commission = r2(priceNext * COMMISSION);
-        await supabase.from('User').update({ walletBalance: r2(wallet - priceNext) }).eq('id', ownerId);
+        await supabase.from('User').update({ walletBalance: r2(wallet - totalCostNext) }).eq('id', ownerId); // списываем totalCost
         await supabase.from('MatrixTable').insert({
           userId: ownerId,
           tableNumber: nextNum,
@@ -275,6 +276,12 @@ export async function processSlotFill(
         await supabase.from('AppRevenue').insert({
           amount: commission,
           type: 'COMMISSION',
+          sourceUserId: ownerId,
+          tableNumber: nextNum,
+        });
+        await supabase.from('AppRevenue').insert({
+          amount: GAS,
+          type: 'GAS',
           sourceUserId: ownerId,
           tableNumber: nextNum,
         });
@@ -322,12 +329,11 @@ export async function engineBuyTable(
 ): Promise<{ success: boolean; error?: string }> {
   const price = TABLE_PRICES[tableNumber];
   if (price == null) return { success: false, error: 'Invalid table number' };
-
+  const totalCost = r2(price + GAS); // price + blockchain fee
   const { data: user, error: userErr } = await supabase.from('User').select('id, walletBalance').eq('id', userId).single();
   if (userErr || !user) return { success: false, error: 'User not found' };
   const wallet = num((user as any).walletBalance);
-  if (wallet < price) return { success: false, error: 'Insufficient balance' };
-
+  if (wallet < totalCost) return { success: false, error: 'Insufficient balance' }; // проверка totalCost
   const { data: existing } = await supabase
     .from('MatrixTable')
     .select('id')
@@ -335,7 +341,6 @@ export async function engineBuyTable(
     .eq('tableNumber', tableNumber)
     .maybeSingle();
   if (existing) return { success: false, error: 'Already own this table' };
-
   if (tableNumber > 1) {
     const { data: prev } = await supabase
       .from('MatrixTable')
@@ -345,10 +350,8 @@ export async function engineBuyTable(
       .maybeSingle();
     if (!prev) return { success: false, error: 'Must own previous table first' };
   }
-
   const commission = r2(price * COMMISSION);
-  await supabase.from('User').update({ walletBalance: r2(wallet - price) }).eq('id', userId);
-
+  await supabase.from('User').update({ walletBalance: r2(wallet - totalCost) }).eq('id', userId); // списываем totalCost
   const { data: inserted } = await supabase
     .from('MatrixTable')
     .insert({
@@ -365,28 +368,28 @@ export async function engineBuyTable(
     .select('id')
     .single();
   if (!inserted) return { success: false, error: 'Failed to create table' };
-
   await supabase.from('AppRevenue').insert({
     amount: commission,
     type: 'COMMISSION',
     sourceUserId: userId,
     tableNumber,
   });
-
+  await supabase.from('AppRevenue').insert({
+    amount: GAS,
+    type: 'GAS',
+    sourceUserId: userId,
+    tableNumber,
+  });
   const { data: statsRow } = await supabase.from('UserStats').select('activeTables').eq('userId', userId).single();
   const activeTables = (statsRow as any) ? Number((statsRow as any).activeTables) || 0 : 0;
   const { error: ue } = await supabase.from('UserStats').update({ activeTables: activeTables + 1, updatedAt: new Date().toISOString() }).eq('userId', userId);
   if (ue) await supabase.from('UserStats').insert({ userId, activeTables: 1, updatedAt: new Date().toISOString() });
-
-  const parent = await findParentWithTable(userId, tableNumber, supabase);
-  const fillAmount = r2(price * (1 - COMMISSION));
-  console.log('[matrix-engine] engineBuyTable: after insert', { userId, tableNumber, parentId: parent?.id ?? null, fillAmount });
-  if (parent) {
-    await processSlotFill(parent.id, tableNumber, userId, fillAmount, supabase);
-  } else {
-    console.error('[matrix-engine] engineBuyTable: no parent found for slot fill', { userId, tableNumber });
+  const { data: sponsor } = await supabase.from('User').select('referrerId').eq('id', userId).single();
+  const sponsorId = (sponsor as any)?.referrerId;
+  if (sponsorId) {
+    const fillAmount = r2(price * (1 - COMMISSION));
+    await processSlotFill(sponsorId, tableNumber, userId, fillAmount, supabase);
   }
-
   return { success: true };
 }
 
@@ -400,12 +403,11 @@ export async function engineRegisterUser(
 ): Promise<void> {
   const price1 = TABLE_PRICES[1];
   if (price1 == null) throw new Error('Table 1 price not defined');
-
+  const totalCost = r2(price1 + GAS); // price + blockchain fee
   const { data: user } = await supabase.from('User').select('walletBalance').eq('id', newUserId).single();
   const wallet = num((user as any)?.walletBalance);
-  const newWallet = r2(wallet - price1);
+  const newWallet = r2(wallet - totalCost); // списываем price+GAS
   await supabase.from('User').update({ walletBalance: newWallet }).eq('id', newUserId);
-
   await supabase.from('MatrixTable').insert({
     userId: newUserId,
     tableNumber: 1,
@@ -417,7 +419,6 @@ export async function engineRegisterUser(
     status: 'ACTIVE',
     cycleCount: 0,
   });
-
   const commission = r2(price1 * COMMISSION);
   await supabase.from('AppRevenue').insert({
     amount: commission,
@@ -425,10 +426,14 @@ export async function engineRegisterUser(
     sourceUserId: newUserId,
     tableNumber: 1,
   });
-
+  await supabase.from('AppRevenue').insert({
+    amount: GAS,
+    type: 'GAS',
+    sourceUserId: newUserId,
+    tableNumber: 1,
+  });
   const { error: ue } = await supabase.from('UserStats').update({ activeTables: 1, updatedAt: new Date().toISOString() }).eq('userId', newUserId);
   if (ue) await supabase.from('UserStats').insert({ userId: newUserId, activeTables: 1, updatedAt: new Date().toISOString() });
-
   const fillAmount = r2(price1 * (1 - COMMISSION));
   await processSlotFill(sponsorId, 1, newUserId, fillAmount, supabase);
 }
