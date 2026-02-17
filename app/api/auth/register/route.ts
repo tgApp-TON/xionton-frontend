@@ -5,7 +5,7 @@ import { engineRegisterUser } from '@/lib/matrix-engine';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { telegramId, telegramUsername, isPremium, nickname, tonWallet, referralCode, language } = body;
+    const { telegramId, telegramUsername, isPremium, nickname, tonWallet, referralCode } = body;
     console.log('Register API received:', { telegramId, telegramUsername, isPremium, nickname, tonWallet: tonWallet ? 'present' : 'empty', referralCode });
 
     if (!telegramId || !nickname) {
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         tonWallet: tonWallet != null && String(tonWallet).trim() !== '' ? String(tonWallet).trim() : '',
         role: 'USER',
         isVerified: true,
-        language: language || 'en',
+        language: 'en',  // Default, user can change in bot
       })
       .select()
       .single();
