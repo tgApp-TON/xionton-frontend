@@ -81,6 +81,7 @@ export default function TablesPage() {
 
   useEffect(() => {
     if (loading) {
+      console.log('Progress interval started, loading:', loading);
       setProgress(0);
       progressIntervalRef.current = setInterval(() => {
         setProgress((prev) => {
@@ -94,6 +95,7 @@ export default function TablesPage() {
           return prev + 2;
         });
       }, 50);
+      console.log('Progress interval set');
     }
 
     return () => {
