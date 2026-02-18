@@ -147,6 +147,16 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
             <span style={{ color: '#888888', fontSize: '0.85rem' }}>Nickname</span>
             <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{stats?.nickname || '—'}</span>
           </div>
+          <button
+            onClick={() => {
+              router.push('/stats');
+              onClose();
+            }}
+            className="w-full mt-4 px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl text-white font-semibold flex items-center justify-between hover:from-purple-700 hover:to-blue-700 transition-all"
+          >
+            <span>📊 Полная статистика</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Section 3 - Navigation */}
