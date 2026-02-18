@@ -59,12 +59,24 @@ export default function TablesPage() {
       if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user) {
         telegramUser = (window as any).Telegram.WebApp.initDataUnsafe.user;
       }
-      const verifyRes = await fetch(`/api/auth/me?userId=${encodeURIComponent(storedId)}`, {
-        method: 'GET',
-        headers: telegramUser ? {
-          'x-telegram-user': JSON.stringify(telegramUser),
-        } : {},
-      });
+      let headers: Record<string, string> = {};
+      if (telegramUser) {
+        try {
+          // Encode to base64 to avoid non-ISO characters
+          const userStr = JSON.stringify(telegramUser);
+          const base64User = btoa(unescape(encodeURIComponent(userStr)));
+          headers = { 'x-telegram-user-base64': base64User };
+        } catch (e) {
+          console.log('Failed to encode telegram user:', e);
+        }
+      }
+      const verifyRes = await fetch(
+        `/api/auth/me?userId=${encodeURIComponent(storedId)}`,
+        {
+          method: 'GET',
+          headers,
+        }
+      );
       const verifyData = await verifyRes.json();
       if (cancelled) return;
       if (!verifyData.exists) {

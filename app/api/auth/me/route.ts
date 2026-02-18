@@ -15,10 +15,11 @@ export async function GET(request: NextRequest) {
       .single();
     if (!userRow) return NextResponse.json({ exists: false });
 
-    // Update Telegram data from request headers if available
-    const telegramData = request.headers.get('x-telegram-user');
-    if (telegramData) {
+    // Update Telegram data from request headers if available (base64-encoded)
+    const telegramDataBase64 = request.headers.get('x-telegram-user-base64');
+    if (telegramDataBase64) {
       try {
+        const telegramData = Buffer.from(telegramDataBase64, 'base64').toString('utf8');
         const userData = JSON.parse(telegramData);
         const updates: Record<string, string> = {};
         if (userData.username && userData.username !== userRow.telegramUsername) {
