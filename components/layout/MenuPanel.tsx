@@ -147,16 +147,30 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
             <span style={{ color: '#888888', fontSize: '0.85rem' }}>Nickname</span>
             <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{stats?.nickname || '—'}</span>
           </div>
-          <button
+          <div
+            className="menu-panel-row"
+            role="button"
+            tabIndex={0}
             onClick={() => {
               router.push('/stats');
               onClose();
             }}
-            className="w-full mt-3 px-4 py-2.5 bg-white/5 hover:bg-white/10 rounded-lg text-white/90 text-sm flex items-center justify-between transition-all border border-white/10"
+            onKeyDown={(e) => e.key === 'Enter' && (router.push('/stats'), onClose())}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              color: '#ffffff',
+              fontSize: '1rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              padding: '12px 0',
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+            }}
           >
-            <span>📊 Полная статистика</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
+            <span>📊 Статистика</span>
+            <ArrowRight size={20} style={{ color: '#ffffff', flexShrink: 0 }} />
+          </div>
         </div>
 
         {/* Section 3 - Navigation */}
