@@ -89,7 +89,7 @@ export default function TablesPage() {
               clearInterval(progressIntervalRef.current);
               progressIntervalRef.current = null;
             }
-            return 95;
+            return prev;
           }
           return prev + 2;
         });
