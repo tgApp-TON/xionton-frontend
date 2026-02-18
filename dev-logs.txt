@@ -117,3 +117,4 @@ Watchpack Error (watcher): Error: EMFILE: too many open files, watch
  GET /register 404 in 49ms
  GET /.well-known/appspecific/com.chrome.devtools.json 404 in 12ms
  GET / 404 in 55ms
+[?25h
