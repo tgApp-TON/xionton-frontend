@@ -54,7 +54,17 @@ export default function TablesPage() {
     }
     let cancelled = false;
     (async () => {
-      const verifyRes = await fetch(`/api/auth/me?userId=${encodeURIComponent(storedId)}`);
+      // Get Telegram user data
+      let telegramUser = null;
+      if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user) {
+        telegramUser = (window as any).Telegram.WebApp.initDataUnsafe.user;
+      }
+      const verifyRes = await fetch(`/api/auth/me?userId=${encodeURIComponent(storedId)}`, {
+        method: 'GET',
+        headers: telegramUser ? {
+          'x-telegram-user': JSON.stringify(telegramUser),
+        } : {},
+      });
       const verifyData = await verifyRes.json();
       if (cancelled) return;
       if (!verifyData.exists) {
