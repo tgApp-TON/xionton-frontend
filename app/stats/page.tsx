@@ -40,9 +40,9 @@ export default function StatsPage() {
 
         const response = await fetch(`/api/stats?userId=${userId}`);
         const data = await response.json();
-        
+
         if (data.error) throw new Error(data.error);
-        
+
         setStats(data);
       } catch (error) {
         console.error('Failed to load stats:', error);
@@ -56,151 +56,139 @@ export default function StatsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, #111827, #1e3a8a, #581c87)', minHeight: '100vh' }}>
-        <div className="text-xl" style={{ color: '#ffffff' }}>Загрузка...</div>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: '#0a0a0a', minHeight: '100vh', position: 'relative', zIndex: 9999 }}
+      >
+        <div className="text-white text-lg">Загрузка...</div>
       </div>
     );
   }
 
   if (!stats) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(to bottom right, #111827, #1e3a8a, #581c87)', minHeight: '100vh' }}>
-        <div className="text-xl" style={{ color: '#ffffff' }}>Ошибка загрузки статистики</div>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: '#0a0a0a', minHeight: '100vh', position: 'relative', zIndex: 9999 }}
+      >
+        <div className="text-white text-lg">Ошибка загрузки статистики</div>
       </div>
     );
   }
 
+  const allTimeProfit = stats.allTime.earned - stats.allTime.invested;
+  const last30Profit = stats.last30Days.earned - stats.last30Days.invested;
+
   return (
-    <div className="min-h-screen p-6" style={{ position: 'relative', zIndex: 9999, background: 'linear-gradient(to bottom right, #111827, #1e3a8a, #581c87)', minHeight: '100vh' }}>
-      {/* Header */}
-      <div className="max-w-4xl mx-auto mb-8">
+    <div
+      className="min-h-screen p-4 sm:p-6"
+      style={{ background: '#0a0a0a', minHeight: '100vh', position: 'relative', zIndex: 9999 }}
+    >
+      <div className="max-w-2xl mx-auto">
         <button
           onClick={() => router.push('/dashboard')}
-          className="mb-4" style={{ color: '#ffffff' }}
+          className="mb-6 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-white flex items-center gap-2 transition-all"
         >
-          ← Назад
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Назад
         </button>
-        <h1 className="text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>📊 Статистика</h1>
-        <p className="text-sm" style={{ color: '#ffffff' }}>{stats.user.nickname}</p>
-        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+
+        <h1 className="text-2xl font-bold text-white mb-1">Статистика</h1>
+        <p className="text-white/80 text-sm">{stats.user.nickname}</p>
+        <p className="text-white/50 text-xs mb-6">
           Регистрация: {new Date(stats.user.registeredAt).toLocaleDateString('ru-RU')}
         </p>
-      </div>
 
-      <div className="max-w-4xl mx-auto space-y-6">
         {/* За всё время */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-          <h2 className="text-2xl font-bold mb-6" style={{ color: '#ffffff' }}>💎 За всё время</h2>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-xl p-4 border border-red-500/30">
-              <div className="text-red-300 text-sm mb-1">Потрачено</div>
-              <div className="text-2xl font-bold" style={{ color: '#ffffff' }}>
-                {stats.allTime.invested.toFixed(2)} <span className="text-lg" style={{ color: '#ffffff' }}>TON</span>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-4">
+          <h2 className="text-lg font-semibold text-white mb-3">За всё время</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-black/50 border border-gray-800 rounded-lg p-3">
+              <div className="text-white/60 text-xs mb-0.5">Потрачено</div>
+              <div className="text-white font-semibold text-base">
+                {stats.allTime.invested.toFixed(2)} <span className="text-white/80 text-sm">TON</span>
               </div>
             </div>
-
-            <div className="bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl p-4 border border-green-500/30">
-              <div className="text-green-300 text-sm mb-1">Заработано</div>
-              <div className="text-2xl font-bold" style={{ color: '#ffffff' }}>
-                {stats.allTime.earned.toFixed(2)} <span className="text-lg" style={{ color: '#ffffff' }}>TON</span>
+            <div className="bg-black/50 border border-gray-800 rounded-lg p-3">
+              <div className="text-white/60 text-xs mb-0.5">Заработано</div>
+              <div className="text-white font-semibold text-base">
+                {stats.allTime.earned.toFixed(2)} <span className="text-white/80 text-sm">TON</span>
               </div>
             </div>
-
-            <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl p-4 border border-blue-500/30">
-              <div className="text-blue-300 text-sm mb-1">Рефералов</div>
-              <div className="text-2xl font-bold" style={{ color: '#ffffff' }}>{stats.allTime.referrals}</div>
+            <div className="bg-black/50 border border-gray-800 rounded-lg p-3">
+              <div className="text-white/60 text-xs mb-0.5">Рефералов</div>
+              <div className="text-white font-semibold text-base">{stats.allTime.referrals}</div>
             </div>
-
-            <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-xl p-4 border border-purple-500/30">
-              <div className="text-purple-300 text-sm mb-1">Столов</div>
-              <div className="text-2xl font-bold" style={{ color: '#ffffff' }}>
-                {stats.allTime.activeTables}/12
-              </div>
+            <div className="bg-black/50 border border-gray-800 rounded-lg p-3">
+              <div className="text-white/60 text-xs mb-0.5">Столов</div>
+              <div className="text-white font-semibold text-base">{stats.allTime.activeTables}/12</div>
             </div>
           </div>
-
-          {/* Прибыль */}
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <div className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>Чистая прибыль</div>
-            <div className={`text-3xl font-bold ${
-              stats.allTime.earned - stats.allTime.invested >= 0 
-                ? 'text-green-400' 
-                : 'text-red-400'
-            }`}>
-              {(stats.allTime.earned - stats.allTime.invested >= 0 ? '+' : '')}
-              {(stats.allTime.earned - stats.allTime.invested).toFixed(2)} TON
+          <div className="mt-3 pt-3 border-t border-gray-800">
+            <div className="text-white/60 text-xs mb-0.5">Чистая прибыль</div>
+            <div
+              className={`text-xl font-bold ${allTimeProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}
+            >
+              {(allTimeProfit >= 0 ? '+' : '') + allTimeProfit.toFixed(2)} TON
             </div>
           </div>
         </div>
 
         {/* За 30 дней */}
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
-          <h2 className="text-2xl font-bold mb-6" style={{ color: '#ffffff' }}>📅 За последние 30 дней</h2>
-          
-          <div className="grid grid-cols-1 gap-4">
-            <div className="bg-white/5 rounded-xl p-4">
-              <div className="flex justify-between items-center mb-2">
-                <span style={{ color: '#ffffff' }}>Потрачено</span>
-                <span className="text-xl font-bold" style={{ color: '#ffffff' }}>
-                  {stats.last30Days.invested.toFixed(2)} TON
-                </span>
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <h2 className="text-lg font-semibold text-white mb-3">За последние 30 дней</h2>
+          <div className="space-y-2">
+            <div className="bg-black/50 border border-gray-800 rounded-lg p-3">
+              <div className="flex justify-between items-center">
+                <span className="text-white/80 text-sm">Потрачено</span>
+                <span className="text-white font-semibold">{stats.last30Days.invested.toFixed(2)} TON</span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
-                <div 
-                  className="bg-red-500 h-2 rounded-full"
-                  style={{ 
-                    width: `${Math.min(100, (stats.last30Days.invested / Math.max(stats.allTime.invested, 1)) * 100)}%` 
+              <div className="mt-1.5 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-red-500/80 rounded-full"
+                  style={{
+                    width: `${Math.min(100, (stats.last30Days.invested / Math.max(stats.allTime.invested, 1)) * 100)}%`,
                   }}
                 />
               </div>
             </div>
-
-            <div className="bg-white/5 rounded-xl p-4">
-              <div className="flex justify-between items-center mb-2">
-                <span style={{ color: '#ffffff' }}>Заработано</span>
-                <span className="text-xl font-bold" style={{ color: '#ffffff' }}>
-                  {stats.last30Days.earned.toFixed(2)} TON
-                </span>
+            <div className="bg-black/50 border border-gray-800 rounded-lg p-3">
+              <div className="flex justify-between items-center">
+                <span className="text-white/80 text-sm">Заработано</span>
+                <span className="text-white font-semibold">{stats.last30Days.earned.toFixed(2)} TON</span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
-                <div 
-                  className="bg-green-500 h-2 rounded-full"
-                  style={{ 
-                    width: `${Math.min(100, (stats.last30Days.earned / Math.max(stats.allTime.earned, 1)) * 100)}%` 
+              <div className="mt-1.5 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-green-500/80 rounded-full"
+                  style={{
+                    width: `${Math.min(100, (stats.last30Days.earned / Math.max(stats.allTime.earned, 1)) * 100)}%`,
                   }}
                 />
               </div>
             </div>
-
-            <div className="bg-white/5 rounded-xl p-4">
-              <div className="flex justify-between items-center mb-2">
-                <span style={{ color: '#ffffff' }}>Новых рефералов</span>
-                <span className="text-xl font-bold" style={{ color: '#ffffff' }}>
-                  {stats.last30Days.referrals}
-                </span>
+            <div className="bg-black/50 border border-gray-800 rounded-lg p-3">
+              <div className="flex justify-between items-center">
+                <span className="text-white/80 text-sm">Новых рефералов</span>
+                <span className="text-white font-semibold">{stats.last30Days.referrals}</span>
               </div>
-              <div className="w-full bg-white/10 rounded-full h-2">
-                <div 
-                  className="bg-blue-500 h-2 rounded-full"
-                  style={{ 
-                    width: `${Math.min(100, (stats.last30Days.referrals / Math.max(stats.allTime.referrals, 1)) * 100)}%` 
+              <div className="mt-1.5 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-500/80 rounded-full"
+                  style={{
+                    width: `${Math.min(100, (stats.last30Days.referrals / Math.max(stats.allTime.referrals, 1)) * 100)}%`,
                   }}
                 />
               </div>
             </div>
           </div>
-
-          {/* Прибыль за 30 дней */}
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <div className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>Чистая прибыль за месяц</div>
-            <div className={`text-2xl font-bold ${
-              stats.last30Days.earned - stats.last30Days.invested >= 0 
-                ? 'text-green-400' 
-                : 'text-red-400'
-            }`}>
-              {(stats.last30Days.earned - stats.last30Days.invested >= 0 ? '+' : '')}
-              {(stats.last30Days.earned - stats.last30Days.invested).toFixed(2)} TON
+          <div className="mt-3 pt-3 border-t border-gray-800">
+            <div className="text-white/60 text-xs mb-0.5">Чистая прибыль за месяц</div>
+            <div
+              className={`text-lg font-bold ${last30Profit >= 0 ? 'text-green-400' : 'text-red-400'}`}
+            >
+              {(last30Profit >= 0 ? '+' : '') + last30Profit.toFixed(2)} TON
             </div>
           </div>
         </div>
