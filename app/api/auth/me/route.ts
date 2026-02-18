@@ -10,10 +10,31 @@ export async function GET(request: NextRequest) {
     if (Number.isNaN(userId)) return NextResponse.json({ exists: false });
     const { data: userRow } = await supabase
       .from('User')
-      .select('id, nickname, role, tonWallet, referralCode')
+      .select('id, nickname, role, tonWallet, referralCode, telegramUsername')
       .eq('id', userId)
       .single();
     if (!userRow) return NextResponse.json({ exists: false });
+
+    // Update Telegram data from request headers if available
+    const telegramData = request.headers.get('x-telegram-init-data');
+    if (telegramData) {
+      try {
+        const params = new URLSearchParams(telegramData);
+        const userDataStr = params.get('user');
+        if (userDataStr) {
+          const userData = JSON.parse(userDataStr);
+          const updates: Record<string, string> = {};
+          if (userData.username && userData.username !== userRow.telegramUsername) {
+            updates.telegramUsername = userData.username;
+          }
+          if (Object.keys(updates).length > 0) {
+            await supabase.from('User').update(updates).eq('id', userId);
+          }
+        }
+      } catch {
+        // Ignore parsing errors
+      }
+    }
 
     let referralCode = userRow.referralCode ?? '';
     if (!referralCode || referralCode.trim() === '') {
