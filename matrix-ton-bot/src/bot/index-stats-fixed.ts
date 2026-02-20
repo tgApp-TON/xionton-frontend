@@ -1,6 +1,6 @@
 import { Bot, InlineKeyboard, Keyboard } from 'grammy';
 import { createClient } from '@supabase/supabase-js';
-import { loadTranslations, getUserLanguageByTelegramId, Language } from '../../src/services/i18n';
+import { loadTranslations, getUserLanguageByTelegramId, Language } from '../../../src/services/i18n';
 import dotenv from 'dotenv';
 
 dotenv.config();
