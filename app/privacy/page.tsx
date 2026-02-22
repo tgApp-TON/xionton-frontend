@@ -6,8 +6,8 @@ export default function PrivacyPolicy() {
       padding: '40px 20px', 
       fontFamily: 'system-ui', 
       lineHeight: '1.6',
-      backgroundColor: '#ffffff',
-      color: '#333333',
+      backgroundColor: '#ffffff' as any, position: 'relative' as any, zIndex: 9999,
+      color: '#333333' as any,
       minHeight: '100vh'
     }}>
       <h1 style={{ color: '#0088CC' }}>Privacy Policy for XionTon</h1>
