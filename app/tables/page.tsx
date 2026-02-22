@@ -315,7 +315,7 @@ export default function TablesPage() {
                 backgroundColor: 'transparent',
               }}
             >
-              <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'white', marginBottom: '24px', textAlign: 'center' }}>Loading tables...</p>
+              <h1 className="xionton-loading-title">XionTon</h1>
               <p style={{ fontSize: '1.5rem', color: 'white', marginBottom: '16px', textAlign: 'center' }}>{progress}%</p>
               <div style={{ width: '250px', height: '8px', backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '4px' }}>
                 <div

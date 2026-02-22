@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head><title>XionTon Logo Generator</title></head>
+<body style="margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #1a1a1a;">
+  <div style="text-align: center;">
+    <canvas id="canvas" width="512" height="512"></canvas>
+    <br><br>
+    <button onclick="download()" style="padding: 15px 30px; font-size: 18px; cursor: pointer; background: #0088CC; color: white; border: none; border-radius: 8px;">Download PNG</button>
+  </div>
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Background gradient circle
+    const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+    gradient.addColorStop(0, '#0088CC');
+    gradient.addColorStop(1, '#8B5CF6');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(256, 256, 256, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Text XnT
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 160px system-ui, -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('XnT', 256, 256);
+    
+    function download() {
+      const link = document.createElement('a');
+      link.download = 'xionton-logo.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
