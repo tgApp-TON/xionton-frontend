@@ -307,7 +307,7 @@ export function RegisterClient() {
                 💰
               </div>
               <div>
-                <p style={{ color: '#ffffff', fontWeight: 600, margin: 0, fontSize: '1rem' }}>270% ROI</p>
+                <p style={{ color: '#ffffff', fontWeight: 600, margin: 0, fontSize: '1rem' }}>Decentralized Matrix</p>
                 <p style={{ color: '#aaaaaa', margin: '4px 0 0 0', fontSize: '0.9rem' }}>Per cycle earnings</p>
               </div>
             </div>

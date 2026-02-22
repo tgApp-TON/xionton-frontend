@@ -143,7 +143,7 @@ export default function StatsPage() {
                 </div>
                 <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '12px' }}>
                   <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', marginBottom: '4px' }}>
-                    Заработано
+                    Получено
                   </div>
                   <div style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>
                     {stats.allTime.earned.toFixed(2)} <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.875rem' }}>TON</span>
@@ -211,7 +211,7 @@ export default function StatsPage() {
                 </div>
                 <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '12px' }}>
                   <div className="flex justify-between items-center">
-                    <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.875rem' }}>Заработано</span>
+                    <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.875rem' }}>Получено</span>
                     <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{stats.last30Days.earned.toFixed(2)} TON</span>
                   </div>
                   <div style={{ marginTop: '6px', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
