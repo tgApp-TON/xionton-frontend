@@ -144,9 +144,9 @@ export function ReferralTree({ userId }: { userId: string }) {
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 12px', marginTop: 4, fontSize: '0.8rem' }}>
                     <span style={{ color: u.activeTables > 0 ? '#22c55e' : '#888' }}>Tables: {u.activeTables}</span>
-                    <span style={{ color: '#a855f7' }}>Earned: {u.totalEarned.toFixed(2)} TON</span>
+                    <span style={{ color: '#a855f7' }}>Received: {u.totalEarned.toFixed(2)} TON</span>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: 2 }}>Refs: {u.referralsCount}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: 2 }}>Members: {u.referralsCount}</div>
                 </div>
                 <ArrowUp size={18} style={{ color: 'rgba(0,212,255,0.6)', flexShrink: 0 }} />
               </div>
@@ -240,10 +240,10 @@ function TreeNodeRow({
             <span style={{ color: node.user.activeTables > 0 ? '#22c55e' : '#888' }}>
               Tables: {node.user.activeTables}
             </span>
-            <span style={{ color: '#a855f7' }}>Earned: {node.user.totalEarned.toFixed(2)} TON</span>
+            <span style={{ color: '#a855f7' }}>Received: {node.user.totalEarned.toFixed(2)} TON</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: '#666', marginTop: 2 }}>
-            Refs: {node.user.referralsCount}
+            Members: {node.user.referralsCount}
           </div>
         </div>
         {hasChildren && (

@@ -210,7 +210,7 @@ export function StatsScreen({ isOpen, onClose }: StatsScreenProps) {
                  }}>
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-sm mb-1 font-medium" style={{ color: '#ffffff' }}>Total Earned</p>
+                  <p className="text-sm mb-1 font-medium" style={{ color: '#ffffff' }}>Total Received</p>
                   <p className="text-5xl font-black" style={{ color: '#ffffff' }}>{stats.totalEarned} TON</p>
                 </div>
                 <div className="p-4 rounded-2xl" style={{ background: 'rgba(150, 150, 150, 0.3)' }}>
@@ -234,7 +234,7 @@ export function StatsScreen({ isOpen, onClose }: StatsScreenProps) {
                   <Users className="w-6 h-6" style={{ color: '#c0c0c0' }} />
                   <span className="text-2xl font-bold" style={{ color: '#ffffff' }}>{stats.activePartners}</span>
                 </div>
-                <p className="text-sm font-medium" style={{ color: '#ffffff' }}>Active Partners</p>
+                <p className="text-sm font-medium" style={{ color: '#ffffff' }}>Active members</p>
               </div>
 
               <div className="rounded-2xl p-5 border"
@@ -276,7 +276,7 @@ export function StatsScreen({ isOpen, onClose }: StatsScreenProps) {
               <div className="flex items-center justify-center gap-4">
                 <GitBranch className="w-8 h-8" style={{ color: '#e5e5e5' }} />
                 <div>
-                  <div className="text-xl font-bold" style={{ color: '#ffffff' }}>View Referral Tree</div>
+                  <div className="text-xl font-bold" style={{ color: '#ffffff' }}>View Network</div>
                   <div className="text-sm" style={{ color: '#aaa' }}>See your network structure</div>
                 </div>
               </div>
@@ -310,7 +310,7 @@ export function StatsScreen({ isOpen, onClose }: StatsScreenProps) {
                  }}>
               <h2 className="text-xl font-bold mb-4" style={{ color: '#ffffff' }}>Recent Activity</h2>
               <div className="space-y-3">
-                {['New partner joined Table 2', 'Cycle closed on Table 4', 'Payout received: 18 TON', 'Table 3 activated'].map((activity, i) => (
+                {['New member joined Table 2', 'Cycle closed on Table 4', 'Payout received: 18 TON', 'Table 3 activated'].map((activity, i) => (
                   <div key={i} className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
                     <div className="w-2 h-2 rounded-full" style={{ background: '#c5c5c5' }} />
                     <span className="text-sm font-medium" style={{ color: '#ffffff' }}>{activity}</span>

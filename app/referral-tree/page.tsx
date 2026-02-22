@@ -62,7 +62,7 @@ export default function ReferralTreePage() {
             marginBottom: '24px',
           }}
         >
-          Referral Tree
+          Network
         </h1>
         {!userId ? (
           <p style={{ color: '#888', textAlign: 'center' }}>Loading...</p>

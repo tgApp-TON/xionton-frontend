@@ -253,7 +253,7 @@ export function RegisterClient() {
             XionTon
           </h1>
           <p style={{ color: '#cccccc', fontSize: '1rem', margin: 0, textAlign: 'center' }}>
-            Earn on TON blockchain
+            Receive on TON blockchain
           </p>
           <div
             style={{
@@ -308,7 +308,7 @@ export function RegisterClient() {
               </div>
               <div>
                 <p style={{ color: '#ffffff', fontWeight: 600, margin: 0, fontSize: '1rem' }}>Decentralized Matrix</p>
-                <p style={{ color: '#aaaaaa', margin: '4px 0 0 0', fontSize: '0.9rem' }}>Per cycle earnings</p>
+                <p style={{ color: '#aaaaaa', margin: '4px 0 0 0', fontSize: '0.9rem' }}>Per cycle distribution</p>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px' }}>

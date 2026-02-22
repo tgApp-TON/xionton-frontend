@@ -15,7 +15,7 @@ export function FullscreenMenu({ isOpen, onClose, stats }: FullscreenMenuProps) 
   if (!isOpen) return null;
   const menuItems = [
     { icon: Home, label: 'Tables', href: '/tables' },
-    { icon: Users, label: 'Referrals', href: '/referrals' },
+    { icon: Users, label: 'Network', href: '/referrals' },
     { icon: Settings, label: 'Settings', href: '/settings' },
   ];
   return (
@@ -33,7 +33,7 @@ export function FullscreenMenu({ isOpen, onClose, stats }: FullscreenMenuProps) 
                       <Wallet className="h-6 w-6 text-cyan-400" />
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-gray-400 mb-1">Total Earned</div>
+                      <div className="text-sm text-gray-400 mb-1">Total Received</div>
                       <div className="text-3xl font-bold text-white">{stats.totalEarned}</div>
                       <div className="text-sm text-cyan-400 font-medium">TON</div>
                     </div>
@@ -61,9 +61,9 @@ export function FullscreenMenu({ isOpen, onClose, stats }: FullscreenMenuProps) 
                       <Users className="h-6 w-6 text-pink-400" />
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-gray-400 mb-1">Total Referrals</div>
+                      <div className="text-sm text-gray-400 mb-1">Network members</div>
                       <div className="text-3xl font-bold text-white">{stats.totalReferrals}</div>
-                      <div className="text-sm text-pink-400 font-medium">partners</div>
+                      <div className="text-sm text-pink-400 font-medium">members</div>
                     </div>
                   </div>
                 </CardContent>

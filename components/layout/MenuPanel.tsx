@@ -140,7 +140,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
             <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{stats?.totalCycles ?? '—'}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
-            <span style={{ color: '#888888', fontSize: '0.85rem' }}>Total Earned</span>
+            <span style={{ color: '#888888', fontSize: '0.85rem' }}>Total Received</span>
             <span style={{ color: '#22c55e', fontWeight: 600, fontSize: '1rem' }}>{stats?.totalEarned != null ? `${Number(stats.totalEarned).toFixed(2)} TON` : '—'}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
@@ -217,7 +217,7 @@ export function MenuPanel({ isOpen, onClose }: MenuPanelProps) {
               borderBottom: '1px solid rgba(255,255,255,0.1)',
             }}
           >
-            <span>Referrals</span>
+            <span>Network</span>
             <ArrowRight size={20} style={{ color: '#ffffff', flexShrink: 0 }} />
           </div>
         </div>

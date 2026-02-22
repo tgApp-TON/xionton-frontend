@@ -74,7 +74,7 @@ export function RegistrationScreen({ onComplete }: RegistrationScreenProps) {
       } else {
         setReferralStatus({
           valid: false,
-          error: 'Invalid referral code'
+          error: 'Invalid invite code'
         });
       }
     } catch (error) {
@@ -587,12 +587,12 @@ export function RegistrationScreen({ onComplete }: RegistrationScreenProps) {
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <Link size={48} style={{ color: '#8b5cf6', marginBottom: '1rem' }} />
               <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.5rem' }}>
-                Referral Code
+                Invite Code
               </h2>
               <p style={{ color: 'rgba(255, 255, 255, 0.6)' }}>
                 {referralCodeFromUrl 
-                  ? 'You were referred to join this team'
-                  : 'Enter a referral code to join someone\'s team (optional)'
+                  ? 'You were invited to join this network'
+                  : 'Enter an invite code to join someone\'s network (optional)'
                 }
               </p>
             </div>
@@ -605,7 +605,7 @@ export function RegistrationScreen({ onComplete }: RegistrationScreenProps) {
                 fontWeight: 600,
                 color: 'rgba(255, 255, 255, 0.8)'
               }}>
-                Referral Code {referralCodeFromUrl ? '' : '(Optional)'}
+                Invite Code {referralCodeFromUrl ? '' : '(Optional)'}
               </label>
               <div style={{ position: 'relative' }}>
                 <input
@@ -622,7 +622,7 @@ export function RegistrationScreen({ onComplete }: RegistrationScreenProps) {
                       }
                     }
                   }}
-                  placeholder="Enter referral code"
+                  placeholder="Enter invite code"
                   disabled={referralCodeFromUrl}
                   style={{
                     ...inputStyle,
@@ -674,8 +674,8 @@ export function RegistrationScreen({ onComplete }: RegistrationScreenProps) {
                 }}>
                   {referralStatus.valid 
                     ? (referralCodeFromUrl 
-                        ? `Referred by: @${referralStatus.username}`
-                        : `Valid! You'll join @${referralStatus.username}'s team`
+                        ? `Invited by: @${referralStatus.username}`
+                        : `Valid! You'll join @${referralStatus.username}'s network`
                       )
                     : referralStatus.error
                   }

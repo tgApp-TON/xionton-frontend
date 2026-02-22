@@ -151,7 +151,7 @@ export default function StatsPage() {
                 </div>
                 <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '12px' }}>
                   <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', marginBottom: '4px' }}>
-                    Рефералов
+                    Участников сети
                   </div>
                   <div style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{stats.allTime.referrals}</div>
                 </div>
@@ -164,7 +164,7 @@ export default function StatsPage() {
               </div>
               <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', marginBottom: '4px' }}>
-                  Чистая прибыль
+                  Баланс
                 </div>
                 <div
                   style={{
@@ -227,7 +227,7 @@ export default function StatsPage() {
                 </div>
                 <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '12px' }}>
                   <div className="flex justify-between items-center">
-                    <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.875rem' }}>Новых рефералов</span>
+                    <span style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.875rem' }}>Новых участников сети</span>
                     <span style={{ color: '#ffffff', fontWeight: 600, fontSize: '1rem' }}>{stats.last30Days.referrals}</span>
                   </div>
                   <div style={{ marginTop: '6px', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '9999px', overflow: 'hidden' }}>
@@ -244,7 +244,7 @@ export default function StatsPage() {
               </div>
               <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                 <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem', marginBottom: '4px' }}>
-                  Чистая прибыль за месяц
+                  Баланс за месяц
                 </div>
                 <div
                   style={{

@@ -203,7 +203,7 @@ export default function ReferralsPage() {
           <p style={{ color: '#888' }}>Loading...</p>
         ) : (
           <>
-            {/* Your Earnings card - top */}
+            {/* Received card - top */}
             <div
               style={{
                 background: 'rgba(34,197,94,0.1)',
@@ -223,18 +223,18 @@ export default function ReferralsPage() {
                   marginBottom: '8px',
                 }}
               >
-                Your earnings
+                Received
               </p>
               <div style={{ color: '#ffffff', fontSize: '2rem', fontWeight: 700, marginBottom: '4px' }}>
                 {(data?.myTotalEarned ?? 0).toFixed(2)} TON
               </div>
-              <p style={{ color: '#888888', fontSize: '0.8rem', margin: 0 }}>Total earned from all tables</p>
+              <p style={{ color: '#888888', fontSize: '0.8rem', margin: 0 }}>Total received from all tables</p>
             </div>
 
-            {/* Section 0 - Your Sponsor */}
+            {/* Section 0 - Your inviter */}
             {data?.sponsor != null && (
               <>
-                <p style={{ ...sectionHeader, marginTop: 0 }}>Your Sponsor</p>
+                <p style={{ ...sectionHeader, marginTop: 0 }}>Your inviter</p>
                 <div
                   style={{
                     background: 'rgba(255,255,255,0.05)',
@@ -248,13 +248,13 @@ export default function ReferralsPage() {
                     {data.sponsor.nickname}
                   </div>
                   <div style={{ color: '#888888', fontSize: '0.85rem' }}>Active Tables: {data.sponsor.activeTables}</div>
-                  <div style={{ color: '#888888', fontSize: '0.85rem' }}>Referrals: {data.sponsor.referralsCount}</div>
+                  <div style={{ color: '#888888', fontSize: '0.85rem' }}>Network members: {data.sponsor.referralsCount}</div>
                 </div>
               </>
             )}
 
-            {/* Section 1 - Your Referral Link */}
-            <p style={{ ...sectionHeader }}>Your Referral Link</p>
+            {/* Section 1 - Your invite link */}
+            <p style={{ ...sectionHeader }}>Your invite link</p>
             <div
               style={{
                 background: 'rgba(168,85,247,0.1)',
@@ -321,8 +321,8 @@ export default function ReferralsPage() {
               </div>
             </div>
 
-            {/* Section 2 - Referral Stats (3 boxes) */}
-            <p style={{ ...sectionHeader, marginTop: '24px' }}>Referral Stats</p>
+            {/* Section 2 - Network stats (3 boxes) */}
+            <p style={{ ...sectionHeader, marginTop: '24px' }}>Network stats</p>
             <div style={{ display: 'flex', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
               {statBox('Total', data?.totalReferrals ?? '—', '#ffffff')}
               {statBox('Workers', data?.workers ?? '—', '#22c55e')}
@@ -346,7 +346,7 @@ export default function ReferralsPage() {
                 marginBottom: '24px',
               }}
             >
-              VIEW REFERRAL TREE →
+              VIEW NETWORK →
             </button>
 
             {/* Section 3 - Filter tabs */}
@@ -372,8 +372,8 @@ export default function ReferralsPage() {
               ))}
             </div>
 
-            {/* Section 4 - Referrals list (filtered) */}
-            <p style={{ ...sectionHeader, marginTop: '24px' }}>Your Referrals</p>
+            {/* Section 4 - Network members list (filtered) */}
+            <p style={{ ...sectionHeader, marginTop: '24px' }}>Network members</p>
             {/* Tree visualization */}
             {data?.referrals != null && data.referrals.length > 0 && (
               <div style={{ width: '100%', overflowX: 'auto', padding: '16px 0', marginBottom: '16px' }}>
@@ -467,7 +467,7 @@ export default function ReferralsPage() {
               <p style={{ color: '#888888', fontSize: '0.9rem', marginTop: '8px' }}>
                 {activeFilter === 'workers' && 'No workers yet.'}
                 {activeFilter === 'loosers' && 'No loosers.'}
-                {activeFilter === 'all' && 'No referrals yet. Share your link to invite friends!'}
+                {activeFilter === 'all' && 'No network members yet. Share your link to invite others!'}
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
@@ -500,7 +500,7 @@ export default function ReferralsPage() {
                       }}
                     >
                       <span style={{ color: '#22c55e', fontSize: '1rem', fontWeight: 700 }}>
-                        💰 {Number(r.totalEarned).toFixed(2)} TON earned
+                        💰 {Number(r.totalEarned).toFixed(2)} TON received
                       </span>
                     </div>
                     {tableProgressForReferral(r.tables ?? [])}

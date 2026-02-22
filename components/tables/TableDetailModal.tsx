@@ -147,7 +147,7 @@ export function TableDetailModal({ tableNumber, userId, onClose }: TableDetailMo
         {!loading && !error && data && (
           <>
             <p style={{ color: '#a855f7', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-              MY EARNINGS
+              RECEIVED
             </p>
             <div style={{ marginBottom: 20, padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
               <p style={{ color: 'white', fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>

@@ -135,13 +135,13 @@ export function ReferralTree({ isOpen, onClose }: ReferralTreeProps) {
 
       <div className="relative z-10 h-full overflow-y-auto">
         <div className="flex items-center justify-center p-6 border-b border-gray-700">
-          <h1 className="text-3xl font-bold" style={{ color: '#ffffff' }}>Referral Tree</h1>
+          <h1 className="text-3xl font-bold" style={{ color: '#ffffff' }}>Network</h1>
         </div>
 
         <div className="p-6 max-w-4xl mx-auto">
           {/* Sponsor */}
           <div className="flex flex-col items-center mb-8">
-            <div className="text-xs mb-2" style={{ color: '#999' }}>↑ YOUR SPONSOR</div>
+            <div className="text-xs mb-2" style={{ color: '#999' }}>↑ YOUR INVITER</div>
             <div 
               className="px-6 py-3 rounded-xl border-2"
               style={{
@@ -169,14 +169,14 @@ export function ReferralTree({ isOpen, onClose }: ReferralTreeProps) {
               }}
             >
               <div className="text-2xl font-black text-center" style={{ color: '#fff' }}>{referralTree.you.nickname}</div>
-              <div className="text-sm text-center mt-1" style={{ color: '#ccc' }}>Total Referrals: {referralTree.you.totalReferrals}</div>
+              <div className="text-sm text-center mt-1" style={{ color: '#ccc' }}>Network members: {referralTree.you.totalReferrals}</div>
             </div>
             <div style={{ width: '2px', height: '40px', background: 'linear-gradient(to bottom, rgba(200,200,200,0.5), rgba(200,200,200,0.2))' }} />
           </div>
 
-          {/* Direct Referrals */}
+          {/* Direct network */}
           <div className="mb-8">
-            <div className="text-center text-sm mb-4" style={{ color: '#aaa' }}>↓ DIRECT REFERRALS (Level 1)</div>
+            <div className="text-center text-sm mb-4" style={{ color: '#aaa' }}>↓ DIRECT NETWORK (Level 1)</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {referralTree.directReferrals.map((ref, i) => (
                 <div key={i} className="flex flex-col items-center">
@@ -189,7 +189,7 @@ export function ReferralTree({ isOpen, onClose }: ReferralTreeProps) {
                     }}
                   >
                     <div className="text-sm font-bold text-center" style={{ color: '#fff' }}>{ref.nickname}</div>
-                    <div className="text-xs text-center mt-1" style={{ color: '#888' }}>Partners: {ref.partners}</div>
+                    <div className="text-xs text-center mt-1" style={{ color: '#888' }}>Members: {ref.partners}</div>
                   </div>
                   {ref.partners > 0 && (
                     <div style={{ width: '2px', height: '30px', background: 'linear-gradient(to bottom, rgba(180,180,180,0.4), rgba(180,180,180,0.1))' }} />
@@ -201,7 +201,7 @@ export function ReferralTree({ isOpen, onClose }: ReferralTreeProps) {
 
           {/* Level 2 */}
           <div>
-            <div className="text-center text-sm mb-4" style={{ color: '#aaa' }}>↓ LEVEL 2 REFERRALS</div>
+            <div className="text-center text-sm mb-4" style={{ color: '#aaa' }}>↓ LEVEL 2 NETWORK</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {referralTree.level2.map((ref, i) => (
                 <div 
