@@ -24,15 +24,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 });
     }
 
-    // rpc disabled
+    await supabase.rpc('update_30day_stats', { p_user_id: parseInt(userId) }).catch(() => {});
 
     const { data: user, error: userError } = await supabase
       .from('User')
-      .select('nickname, totalEarned, totalInvestedReal, last30DaysEarned, last30DaysInvested, last30DaysReferrals, registeredAt')
+      .select('nickname, totalInvestedReal, last30DaysInvested, last30DaysReferrals, registeredAt')
       .eq('id', userId)
       .single();
 
     if (userError) throw userError;
+
+    const uid = parseInt(userId, 10);
+
+    // Earned = only real payouts from PayoutLog (ignore User.totalEarned to avoid stale/wrong data)
+    const { data: allPayouts } = await supabase
+      .from('PayoutLog')
+      .select('amount')
+      .eq('toUserId', uid);
+    const allTimeEarned = (allPayouts ?? []).reduce((sum: number, p: any) => sum + Number(p.amount ?? 0), 0);
+
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const { data: recentPayouts } = await supabase
+      .from('PayoutLog')
+      .select('amount')
+      .eq('toUserId', uid)
+      .gte('createdAt', thirtyDaysAgo.toISOString());
+    const last30DaysEarned = (recentPayouts ?? []).reduce((sum: number, p: any) => sum + Number(p.amount ?? 0), 0);
 
     const { count: activeTables } = await supabase
       .from('MatrixTable')
@@ -52,13 +70,13 @@ export async function GET(request: NextRequest) {
       },
       allTime: {
         invested: Number(user.totalInvestedReal || 0),
-        earned: Number(user.totalEarned || 0),
+        earned: Math.round(allTimeEarned * 100) / 100,
         referrals: totalReferrals || 0,
         activeTables: activeTables || 0,
       },
       last30Days: {
         invested: Number(user.last30DaysInvested || 0),
-        earned: Number(user.last30DaysEarned || 0),
+        earned: Math.round(last30DaysEarned * 100) / 100,
         referrals: user.last30DaysReferrals || 0,
       }
     });

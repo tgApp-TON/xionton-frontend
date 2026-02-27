@@ -14,6 +14,7 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^25.2.2",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
