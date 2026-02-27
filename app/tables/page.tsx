@@ -7,6 +7,7 @@ import { CanvasTableCard } from '@/components/tables/CanvasTableCard';
 import { TableDetailModal } from '@/components/tables/TableDetailModal';
 import { MenuPanel } from '@/components/layout/MenuPanel';
 import { TABLE_PRICES } from '@/lib/types';
+import { useTonConnectUI } from '@tonconnect/ui-react';
 
 export default function TablesPage() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function TablesPage() {
   const [confirmModal, setConfirmModal] = useState<{ tableNumber: number; price: number } | null>(null);
   const [tableDetailModal, setTableDetailModal] = useState<{ tableNumber: number } | null>(null);
 
+  const [tonConnectUI] = useTonConnectUI();
   const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -193,23 +195,24 @@ export default function TablesPage() {
 
   const handleBuyTable = async (tableNumber: number) => {
     if (!userId) return;
+    const CONTRACT = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '';
+    if (!CONTRACT) { setToast({ msg: 'Contract not configured', type: 'error' }); return; }
+    const prices: Record<number, number> = {
+      1:10, 2:20, 3:40, 4:80, 5:160,
+      6:320, 7:640, 8:1280, 9:2560,
+      10:5120, 11:10240, 12:20480
+    };
+    const amount = Math.floor((prices[tableNumber] + 0.5) * 1e9);
     setBuyingTable(tableNumber);
     try {
-      const res = await fetch('/api/table/buy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: parseInt(userId, 10), tableNumber }),
+      await tonConnectUI.sendTransaction({
+        validUntil: Math.floor(Date.now() / 1000) + 600,
+        messages: [{ address: CONTRACT, amount: amount.toString() }]
       });
-      const data = await res.json();
-      if (data.success) {
-        setConfirmModal(null);
-        await refreshTables();
-        setToast({ msg: `Table ${tableNumber} activated!`, type: 'success' });
-      } else {
-        setToast({ msg: data.error ?? 'Purchase failed', type: 'error' });
-      }
+      setConfirmModal(null);
+      setToast({ msg: `Payment sent! Table ${tableNumber} will activate shortly.`, type: 'success' });
     } catch (e) {
-      setToast({ msg: 'Transaction failed', type: 'error' });
+      setToast({ msg: 'Transaction cancelled', type: 'error' });
     } finally {
       setBuyingTable(null);
     }
