@@ -456,7 +456,7 @@ export default function TablesPage() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', color: '#a855f7', fontWeight: 700 }}>
                 <span>Total:</span>
-                <span>{confirmModal.price + 0.5} TON</span>
+                <span>{confirmModal.tableNumber === 1 ? 10.8 : confirmModal.price + 0.8} TON</span>
               </div>
             </div>
             <div style={{ fontSize: '0.75rem', color: '#888', marginTop: 12, lineHeight: 1.5 }}>
