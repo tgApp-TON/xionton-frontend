@@ -207,7 +207,7 @@ export default function TablesPage() {
       6:0.0032, 7:0.0064, 8:0.0128, 9:0.0256,
       10:0.0512, 11:0.1024, 12:0.2048
     };
-    const amount = Math.floor((prices[tableNumber] + 0.000005) * 1e9);
+    const amount = Math.floor((prices[tableNumber] + 0.05) * 1e9);
     setBuyingTable(tableNumber);
     try {
       let payload: string;
