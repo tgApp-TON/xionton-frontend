@@ -31,6 +31,17 @@ export async function POST(request: NextRequest) {
       numericTelegramId = String(Math.abs(hash) + 9000000000);
     }
 
+    // Check if user already exists by tonWallet first
+    if (tonWallet && String(tonWallet).trim() !== '') {
+      const { data: walletUsers } = await supabase
+        .from('User')
+        .select('*')
+        .eq('tonWallet', String(tonWallet).trim());
+      if (walletUsers && walletUsers.length > 0) {
+        return NextResponse.json({ success: true, user: walletUsers[0] });
+      }
+    }
+
     // Check if user already exists by telegramId
     const { data: existingUsers } = await supabase
       .from('User')
