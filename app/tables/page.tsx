@@ -201,7 +201,8 @@ export default function TablesPage() {
   const handleBuyTable = async (tableNumber: number) => {
     if (!userId) return;
     const CONTRACT = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || '';
-    if (!CONTRACT) { setToast({ msg: 'Contract not configured', type: 'error' }); return; }
+    if (!CONTRACT) { setToast({ msg: "Contract not configured", type: "error" }); return; }
+    console.log("CONTRACT:", CONTRACT, "MASTER:", process.env.NEXT_PUBLIC_MASTER_WALLET);
     const prices: Record<number, number> = {
       1:0.0001, 2:0.0002, 3:0.0004, 4:0.0008, 5:0.0016,
       6:0.0032, 7:0.0064, 8:0.0128, 9:0.0256,
