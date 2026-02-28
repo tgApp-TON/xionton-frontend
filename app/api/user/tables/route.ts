@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
   try {
     // Returns Table rows only; slots/positions (TablePosition) are not included - fetch separately if needed
     const { data: tables, error } = await supabase
-      .from('Table')
-      .select('id, tableNumber, status, cycleNumber, createdAt, closedAt')
+      .from('MatrixTable')
+      .select('id, tableNumber, status, cycleCount, createdAt')
       .eq('userId', parseInt(userId))
       .order('tableNumber', { ascending: true });
 
