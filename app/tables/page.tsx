@@ -50,34 +50,31 @@ export default function TablesPage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    let storedId = localStorage.getItem('matrix_ton_user_id');
-    if (!storedId) {
-      // Try to find user by Telegram ID
-      const tgUser = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
-      if (tgUser?.id) {
-        const res = await fetch(`/api/auth/me?telegramId=${tgUser.id}`);
-        const data = await res.json();
-        if (data.exists && data.user?.id) {
-          storedId = String(data.user.id);
-          localStorage.setItem('matrix_ton_user_id', storedId);
-        }
-      }
-      if (!storedId) {
-        router.replace('/register');
-        return;
-      }
-    }
     let cancelled = false;
     (async () => {
-      // Get Telegram user data
+      let storedId = localStorage.getItem('matrix_ton_user_id');
+      if (!storedId) {
+        const tgUser = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
+        if (tgUser?.id) {
+          const res = await fetch(`/api/auth/me?telegramId=${tgUser.id}`);
+          const data = await res.json();
+          if (data.exists && data.user?.id) {
+            storedId = String(data.user.id);
+            localStorage.setItem('matrix_ton_user_id', storedId);
+          }
+        }
+        if (!storedId) {
+          router.replace('/register');
+          return;
+        }
+      }
       let telegramUser = null;
-      if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp?.initDataUnsafe?.user) {
+      if ((window as any).Telegram?.WebApp?.initDataUnsafe?.user) {
         telegramUser = (window as any).Telegram.WebApp.initDataUnsafe.user;
       }
       let headers: Record<string, string> = {};
       if (telegramUser) {
         try {
-          // Encode to base64 to avoid non-ISO characters
           const userStr = JSON.stringify(telegramUser);
           const base64User = btoa(unescape(encodeURIComponent(userStr)));
           headers = { 'x-telegram-user-base64': base64User };
@@ -87,10 +84,7 @@ export default function TablesPage() {
       }
       const verifyRes = await fetch(
         `/api/auth/me?userId=${encodeURIComponent(storedId)}`,
-        {
-          method: 'GET',
-          headers,
-        }
+        { method: 'GET', headers }
       );
       const verifyData = await verifyRes.json();
       if (cancelled) return;
@@ -101,9 +95,7 @@ export default function TablesPage() {
       }
       setUserId(storedId);
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [router]);
 
   useEffect(() => {
