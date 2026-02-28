@@ -234,6 +234,18 @@ export default function TablesPage() {
       });
       setConfirmModal(null);
       setToast({ msg: `Payment sent! Table ${tableNumber} will activate shortly.`, type: 'success' });
+      // Poll for table activation
+      let attempts = 0;
+      const poll = setInterval(async () => {
+        attempts++;
+        const res = await fetch(`/api/table/list?userId=${userId}`);
+        const data = await res.json();
+        if (data.success) {
+          setUserTables(data.tables);
+          const activated = data.tables.find((t: {tableNumber: number}) => t.tableNumber === tableNumber);
+          if (activated || attempts >= 20) clearInterval(poll);
+        }
+      }, 3000);
     } catch (e) {
       setToast({ msg: 'Transaction cancelled', type: 'error' });
     } finally {
