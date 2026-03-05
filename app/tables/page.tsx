@@ -250,7 +250,7 @@ export default function TablesPage() {
         }
       }, 3000);
     } catch (e) {
-      setToast({ msg: 'Transaction cancelled', type: 'error' });
+      console.error("❌ TX ERROR:", e); setToast({ msg: 'Transaction cancelled: ' + (e instanceof Error ? e.message : String(e)), type: 'error' });
     } finally {
       setBuyingTable(null);
     }
