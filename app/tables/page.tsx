@@ -229,7 +229,7 @@ export default function TablesPage() {
           .toString('base64');
       }
       await tonConnectUI.sendTransaction({
-        validUntil: Math.floor(Date.now() / 1000) + 600,
+        validUntil: Math.floor(Date.now() / 1000) + 300,
         messages: [{ address: CONTRACT, amount: amount.toString(), payload }]
       });
       setConfirmModal(null);
