@@ -53,8 +53,8 @@ export function RegisterClient() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [registering, setRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [registerAttempt, setRegisterAttempt] = useState(0);
-  const [nickname] = useState(() => 'user_' + Math.floor(100000 + Math.random() * 900000));
+  const [nickname, setNickname] = useState(() => 'user_' + Math.floor(100000 + Math.random() * 900000));
+  const [walletCheckDone, setWalletCheckDone] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -111,11 +111,84 @@ export function RegisterClient() {
       .catch(() => {});
   }, [router, isReady]);
 
+  // After wallet connect: check user by wallet → auth or show nickname form
   useEffect(() => {
-    if (step !== 2) return;
-    if (!tonAddress) return;
-    setStep(3);
-  }, [step, tonAddress]);
+    if (step !== 2 || !tonAddress || walletCheckDone) return;
+
+    let cancelled = false;
+    setRegistering(true);
+    setError(null);
+
+    const checkByWallet = async () => {
+      let effectiveTelegramId: string = user?.id != null ? String(user.id) : String(Date.now());
+      let effectiveTelegramUsername: string | undefined = user?.username;
+      const tgWebApp = typeof window !== 'undefined' ? (window as any)?.Telegram?.WebApp : null;
+      const tgUser = tgWebApp?.initDataUnsafe?.user;
+      if (tgUser) {
+        if (tgUser.id) effectiveTelegramId = String(tgUser.id);
+        if (tgUser.username) effectiveTelegramUsername = tgUser.username;
+      }
+      if (webApp?.initData) {
+        try {
+          const initRes = await fetch('/api/auth/telegram-init', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData: webApp.initData }),
+          });
+          const initData = await initRes.json();
+          if (initData.valid === true && initData.user) {
+            effectiveTelegramId = String(initData.user.id);
+            effectiveTelegramUsername = initData.user.username;
+          }
+        } catch {
+          // keep
+        }
+      }
+
+      const referralCodeToSend =
+        (typeof window !== 'undefined' ? localStorage.getItem('matrix_ton_referral_code') : null) || 'MASTER';
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            telegramId: effectiveTelegramId,
+            telegramUsername: effectiveTelegramUsername || undefined,
+            isPremium: true,
+            tonWallet: tonAddress,
+            referralCode: referralCodeToSend,
+          }),
+        });
+        const data = await res.json();
+
+        if (cancelled) return;
+
+        if (data?.success && (data.userId != null || data.user?.id != null)) {
+          localStorage.setItem('matrix_ton_user_id', String(data.userId ?? data.user.id));
+          router.replace('/tables');
+          return;
+        }
+
+        if (res.status === 400 && data?.requiresNickname === true) {
+          setWalletCheckDone(true);
+          setStep(3);
+          return;
+        }
+
+        setError(data?.error || 'Something went wrong');
+      } catch {
+        if (!cancelled) setError('Connection failed');
+      } finally {
+        if (!cancelled) setRegistering(false);
+      }
+    };
+
+    checkByWallet();
+    return () => {
+      cancelled = true;
+    };
+  }, [step, tonAddress, walletCheckDone, router, user, webApp?.initData]);
 
   const handleRegister = async () => {
     setRegistering(true);
@@ -195,12 +268,6 @@ export function RegisterClient() {
     }
   };
 
-  useEffect(() => {
-    if (step !== 3) return;
-    if (registering) return;
-    handleRegister();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, registerAttempt]);
 
   return (
     <div
@@ -363,6 +430,36 @@ export function RegisterClient() {
             <p style={{ color: '#cccccc', margin: '10px 0 0 0' }}>TON wallet required to participate</p>
           </div>
 
+          {!tonAddress ? (
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <TonConnectButton />
+            </div>
+          ) : registering ? (
+            <div style={{ textAlign: 'center' }}>
+              <div style={spinnerStyle} />
+              <p style={{ color: '#cccccc', marginTop: '14px', marginBottom: 0 }}>Checking account...</p>
+            </div>
+          ) : error ? (
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ color: '#ff6b6b', marginBottom: '12px' }}>{error}</p>
+              <button
+                onClick={() => { setError(null); setWalletCheckDone(false); }}
+                style={{ ...buttonStyle }}
+              >
+                Retry
+              </button>
+            </div>
+          ) : null}
+        </div>
+      )}
+
+      {step === 3 && (
+        <div style={containerStyle}>
+          <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+            <h2 style={{ color: '#ffffff', fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Choose nickname</h2>
+            <p style={{ color: '#cccccc', margin: '10px 0 0 0' }}>One nickname = one wallet</p>
+          </div>
+
           <div
             style={{
               background: 'rgba(168, 85, 247, 0.1)',
@@ -370,43 +467,41 @@ export function RegisterClient() {
               borderRadius: '12px',
               padding: '16px',
               marginBottom: '20px',
-              textAlign: 'center',
             }}
           >
-            <p style={{ color: '#ffffff', fontWeight: 700, fontSize: '1rem', margin: '0 0 8px 0' }}>
-              Your nickname: <span style={{ color: '#a855f7' }}>{nickname}</span>
-            </p>
-            <p style={{ color: '#aaaaaa', fontSize: '0.85rem', margin: 0 }}>
-              You are verified by your unique nickname + wallet. One nickname = one wallet.
-            </p>
+            <label style={{ color: '#aaaaaa', fontSize: '0.85rem', display: 'block', marginBottom: '8px' }}>
+              Nickname
+            </label>
+            <input
+              type="text"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value.trim() || e.target.value)}
+              placeholder="user_123456"
+              disabled={registering}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                background: '#111',
+                color: '#fff',
+                fontSize: '1rem',
+              }}
+            />
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <TonConnectButton />
-          </div>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div style={containerStyle}>
-          {!error ? (
-            <div style={{ textAlign: 'center' }}>
-              <div style={spinnerStyle} />
-              <p style={{ color: '#cccccc', marginTop: '14px', marginBottom: 0 }}>Registering...</p>
-            </div>
-          ) : (
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ color: '#ffffff', fontWeight: 700, fontSize: '1.25rem', margin: 0 }}>Error</p>
-              <p style={{ color: '#cccccc', marginTop: '10px' }}>{error}</p>
-              <button
-                onClick={() => setRegisterAttempt((x) => x + 1)}
-                disabled={registering}
-                style={{ ...buttonStyle, color: '#ffffff', opacity: registering ? 0.7 : 1 }}
-              >
-                Retry
-              </button>
-            </div>
+          {error && (
+            <p style={{ color: '#ff6b6b', marginBottom: '12px', textAlign: 'center' }}>{error}</p>
           )}
+
+          <button
+            onClick={() => { setError(null); handleRegister(); }}
+            disabled={registering}
+            style={{ ...buttonStyle, opacity: registering ? 0.7 : 1 }}
+          >
+            {registering ? 'Registering...' : 'Create account'}
+          </button>
         </div>
       )}
     </div>

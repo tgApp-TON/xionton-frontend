@@ -2,47 +2,69 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { engineRegisterUser } from '@/lib/matrix-engine';
 
+function toNumericTelegramId(telegramId: string | number): string {
+  if (/^\d+$/.test(String(telegramId))) return String(telegramId);
+  const str = String(telegramId);
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return String(Math.abs(hash) + 9000000000);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { telegramId, telegramUsername, isPremium, nickname, tonWallet, referralCode } = body;
     console.log('Register API received:', { telegramId, telegramUsername, isPremium, nickname, tonWallet: tonWallet ? 'present' : 'empty', referralCode });
 
-    if (!telegramId || !nickname) {
+    if (!telegramId) {
       return NextResponse.json(
-        { error: 'telegramId and nickname are required' },
+        { error: 'telegramId is required' },
         { status: 400 }
       );
     }
 
-    // Convert telegramId to a valid bigint-compatible value
-    // If it starts with "wallet_" or contains non-numeric chars, generate a numeric hash
-    let numericTelegramId: string;
-    if (/^\d+$/.test(String(telegramId))) {
-      numericTelegramId = String(telegramId);
-    } else {
-      // Create a numeric hash from the string (use char codes)
-      const str = String(telegramId);
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash = hash & hash;
-      }
-      numericTelegramId = String(Math.abs(hash) + 9000000000);
-    }
+    const numericTelegramId = toNumericTelegramId(telegramId);
+    const walletTrimmed = tonWallet != null && String(tonWallet).trim() !== '' ? String(tonWallet).trim() : '';
 
-    // Check if user already exists by tonWallet first
-    if (tonWallet && String(tonWallet).trim() !== '') {
-      const { data: walletUsers } = await supabase
+    // 1) If tonWallet provided: check existing user by wallet → update telegramId and authorize (no nickname)
+    if (walletTrimmed) {
+      const { data: userByWallet } = await supabase
         .from('User')
         .select('*')
-        .eq('tonWallet', String(tonWallet).trim());
-      if (walletUsers && walletUsers.length > 0) {
-        return NextResponse.json({ success: true, user: walletUsers[0] });
+        .eq('tonWallet', walletTrimmed)
+        .maybeSingle();
+
+      if (userByWallet) {
+        const updates: { telegramId: string; telegramUsername?: string | null } = { telegramId: numericTelegramId };
+        if (telegramUsername != null) updates.telegramUsername = String(telegramUsername) || null;
+        await supabase.from('User').update(updates).eq('id', userByWallet.id);
+        const { data: updated } = await supabase
+          .from('User')
+          .select('*')
+          .eq('id', userByWallet.id)
+          .single();
+        return NextResponse.json({ success: true, user: updated ?? userByWallet });
       }
     }
 
-    // Check if user already exists by telegramId
+    // 2) New user path: nickname and tonWallet required before creating
+    if (!nickname || String(nickname).trim() === '') {
+      return NextResponse.json(
+        { error: 'nickname required', requiresNickname: true },
+        { status: 400 }
+      );
+    }
+    if (!walletTrimmed) {
+      return NextResponse.json(
+        { error: 'tonWallet is required to register' },
+        { status: 400 }
+      );
+    }
+
+    // Check if user already exists by telegramId (update telegramUsername only)
     const { data: existingUsers } = await supabase
       .from('User')
       .select('*')
@@ -50,7 +72,6 @@ export async function POST(request: NextRequest) {
 
     if (existingUsers && existingUsers.length > 0) {
       const existing = existingUsers[0];
-      // Update telegramUsername on every login if it changed
       if (telegramUsername != null && String(telegramUsername) !== (existing.telegramUsername ?? '')) {
         await supabase
           .from('User')
@@ -87,12 +108,12 @@ export async function POST(request: NextRequest) {
       .insert({
         telegramId: numericTelegramId,
         telegramUsername: telegramUsername || null,
-        nickname,
+        nickname: String(nickname).trim(),
         referrerId,
         referralCode: referralCodeValue,
         isPremium: Boolean(isPremium),
         accountCreatedDate: new Date().toISOString(),
-        tonWallet: tonWallet != null && String(tonWallet).trim() !== '' ? String(tonWallet).trim() : '',
+        tonWallet: walletTrimmed,
         role: 'USER',
         isVerified: true,
         language: 'en',  // Default, user can change in bot
