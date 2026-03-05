@@ -469,7 +469,7 @@ export default function TablesPage() {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', color: '#888', fontSize: '0.8rem' }}>
                 <span>Blockchain fee:</span>
-                <span>0.1 TON</span>
+                <span>0.05 TON</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', color: '#a855f7', fontWeight: 700 }}>
                 <span>Total:</span>
