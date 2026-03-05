@@ -209,7 +209,6 @@ export default function TablesPage() {
       10:0.0512, 11:0.1024, 12:0.2048
     };
     const amount = Math.floor((prices[tableNumber] + 0.05) * 1e9);
-    console.log("AMOUNT:", amount);
     setBuyingTable(tableNumber);
     try {
       let payload: string;
@@ -227,7 +226,6 @@ export default function TablesPage() {
           .storeUint(tableNumber, 8)
           .endCell()
           .toBoc()
-      console.log("SENDING TX:", amount.toString());
           .toString('base64');
       }
       await tonConnectUI.sendTransaction({
