@@ -8,7 +8,7 @@ import { TableDetailModal } from '@/components/tables/TableDetailModal';
 import { MenuPanel } from '@/components/layout/MenuPanel';
 import { TABLE_PRICES } from '@/lib/types';
 import { useTonConnectUI } from '@tonconnect/ui-react';
-import { beginCell, Address } from '@ton/core';
+import { beginCell } from '@ton/core';
 
 export default function TablesPage() {
   const router = useRouter();
@@ -212,25 +212,13 @@ export default function TablesPage() {
     console.log("💰 AMOUNT:", amount);
     setBuyingTable(tableNumber);
     try {
-      let payload: string;
-      if (tableNumber === 1) {
-        const masterWallet = 'UQDO7QI8Hvp5ZSZ7zr-4CPlnxCjP3kfw2dSyuXDCJ3fgQtMY';
-        payload = beginCell()
-          .storeUint(0x100, 32)
-          .storeAddress(Address.parse(masterWallet))
-          .endCell()
-          .toBoc()
-          .toString('base64');
-        console.log("🚀 SENDING TX table 1:", { amount: amount.toString(), CONTRACT });
-      } else {
-        payload = beginCell()
-          .storeUint(0x101, 32)
-          .storeUint(tableNumber, 8)
-          .endCell()
-          .toBoc()
-          .toString('base64');
-        console.log("🚀 SENDING TX table N:", { amount: amount.toString(), CONTRACT });
-      }
+      const payload = beginCell()
+        .storeUint(0x101, 32)
+        .storeUint(tableNumber, 8)
+        .endCell()
+        .toBoc()
+        .toString('base64');
+      console.log("🚀 SENDING TX table", tableNumber, ":", { amount: amount.toString(), CONTRACT });
       await tonConnectUI.sendTransaction({
         validUntil: Math.floor(Date.now() / 1000) + 300,
         messages: [{ address: CONTRACT, amount: amount.toString(), payload }]
