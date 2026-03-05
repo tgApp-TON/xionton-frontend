@@ -214,13 +214,17 @@ export default function TablesPage() {
     try {
       let payload: string;
       if (tableNumber === 1) {
-      payload = beginCell()
-        .storeUint(0x101, 32)
-        .storeUint(tableNumber, 8)
-        .endCell()
-        .toBoc()
-        .toString('base64');
-      console.log("🚀 SENDING TX table", tableNumber, ":", { amount: amount.toString(), CONTRACT });
+        const masterWallet = 'UQDO7QI8Hvp5ZSZ7zr-4CPlnxCjP3kfw2dSyuXDCJ3fgQtMY';
+        payload = beginCell()
+          .storeUint(0x100, 32)
+          .storeAddress(Address.parse(masterWallet))
+          .endCell()
+          .toBoc()
+          .toString('base64');
+        console.log("🚀 SENDING TX table 1:", { amount: amount.toString(), CONTRACT });
+      } else {
+        payload = beginCell()
+          .storeUint(0x101, 32)
           .storeUint(tableNumber, 8)
           .endCell()
           .toBoc()
